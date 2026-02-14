@@ -1,21 +1,26 @@
-import { PNG } from 'pngjs';
+import GIFEncoder from 'gif-encoder-2';
 
 /**
- * Convert PixelBuffer to PNG base64
+ * Convert PixelBuffer frames to GIF base64
  */
-export function frameToPngBase64(frame: any): string {
-  const png = new PNG({
-    width: frame.width,
-    height: frame.height,
-    colorType: 6, // RGBA
-  });
-
-  // Copy RGBA data
-  png.data = Buffer.from(frame.data);
-
-  // Pack and encode to base64
-  const buffer = PNG.sync.write(png);
-  return buffer.toString('base64');
+export function framesToGifBase64(frames: any[], delay: number = 75): string {
+  if (frames.length === 0) throw new Error('No frames to encode');
+  
+  const width = frames[0].width;
+  const height = frames[0].height;
+  
+  const encoder = new GIFEncoder(width, height);
+  encoder.setDelay(delay);
+  encoder.setRepeat(0); // 0 = loop forever
+  encoder.start();
+  
+  for (const frame of frames) {
+    encoder.addFrame(Buffer.from(frame.data));
+  }
+  
+  encoder.finish();
+  const buf = encoder.out.getData();
+  return buf.toString('base64');
 }
 
 /**

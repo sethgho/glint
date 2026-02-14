@@ -3,7 +3,7 @@
 import { Command } from 'commander';
 import { getEmotion, listEmotions } from './emotions';
 import { renderEmotion } from './renderer';
-import { frameToPngBase64, pushToTidbyt } from './push';
+import { framesToGifBase64, pushToTidbyt } from './push';
 
 const program = new Command();
 
@@ -41,8 +41,8 @@ program
         throw new Error('No frames rendered');
       }
 
-      // Convert to PNG and push
-      const imageBase64 = frameToPngBase64(frames[0]);
+      // Convert to GIF and push
+      const imageBase64 = framesToGifBase64(frames);
       console.log('Pushing to Tidbyt...');
 
       await pushToTidbyt(imageBase64, {

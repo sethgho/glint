@@ -1,123 +1,56 @@
-import { render, loadBuiltinFonts, Box, Root, Stack } from 'typlit';
+import { render, loadBuiltinFonts, Box, Root, Row, Column } from 'typlit';
 import type { EmotionConfig } from './emotions';
 
-/**
- * Renders eyes and eyebrows for a given emotion config
- * Returns PixelBuffer frames suitable for Tidbyt display (64x32)
- */
 export async function renderEmotion(
   emotion: EmotionConfig
 ): Promise<any[]> {
   await loadBuiltinFonts();
 
-  const App = () => (
-    <Root>
-      <Box width={64} height={32} backgroundColor="#000">
-        <Stack>
-          {/* Left eye and eyebrow */}
-          <Eye
-            x={16}
-            y={16}
-            openness={emotion.eyeOpenness}
-            pupilSize={emotion.pupilSize}
-          />
-          <Eyebrow
-            x={16}
-            y={16}
-            angle={emotion.eyebrowAngle}
-            height={emotion.eyebrowHeight}
-          />
+  const App = () => {
+    // Calculate eye dimensions based on emotion
+    const eyeWidth = 10;
+    const eyeHeight = Math.max(3, Math.round(10 * emotion.eyeOpenness));
+    const pupilSize = Math.max(2, Math.round(6 * emotion.pupilSize));
+    
+    // Eyebrow positioning
+    const browY = Math.round(4 - (emotion.eyebrowHeight * 2));
+    const browWidth = 12;
+    const browHeight = 2;
 
-          {/* Right eye and eyebrow */}
-          <Eye
-            x={48}
-            y={16}
-            openness={emotion.eyeOpenness}
-            pupilSize={emotion.pupilSize}
-          />
-          <Eyebrow
-            x={48}
-            y={16}
-            angle={emotion.eyebrowAngle}
-            height={emotion.eyebrowHeight}
-          />
-        </Stack>
-      </Box>
-    </Root>
-  );
+    return (
+      <Root>
+        <Box color="#000000" padding={2}>
+          <Column expanded mainAlign="center" crossAlign="center">
+            <Row mainAlign="space_evenly" crossAlign="center">
+              {/* Left eye with eyebrow */}
+              <Column mainAlign="center" crossAlign="center">
+                <Box height={Math.max(0, browY)} />
+                <Box width={browWidth} height={browHeight} color="#FFFFFF" />
+                <Box height={2} />
+                <Box width={eyeWidth} height={eyeHeight} color="#FFFFFF">
+                  <Column expanded mainAlign="center" crossAlign="center">
+                    <Box width={pupilSize} height={pupilSize} color="#000000" />
+                  </Column>
+                </Box>
+              </Column>
+
+              {/* Right eye with eyebrow */}
+              <Column mainAlign="center" crossAlign="center">
+                <Box height={Math.max(0, browY)} />
+                <Box width={browWidth} height={browHeight} color="#FFFFFF" />
+                <Box height={2} />
+                <Box width={eyeWidth} height={eyeHeight} color="#FFFFFF">
+                  <Column expanded mainAlign="center" crossAlign="center">
+                    <Box width={pupilSize} height={pupilSize} color="#000000" />
+                  </Column>
+                </Box>
+              </Column>
+            </Row>
+          </Column>
+        </Box>
+      </Root>
+    );
+  };
 
   return await render(<App />);
-}
-
-interface EyeProps {
-  x: number;
-  y: number;
-  openness: number;
-  pupilSize: number;
-}
-
-function Eye({ x, y, openness, pupilSize }: EyeProps) {
-  const eyeWidth = 8;
-  const eyeHeight = Math.round(8 * openness);
-  const pupilDiameter = Math.round(4 * pupilSize);
-
-  return (
-    <>
-      {/* Eye white */}
-      <Box
-        x={x - eyeWidth / 2}
-        y={y - eyeHeight / 2}
-        width={eyeWidth}
-        height={eyeHeight}
-        backgroundColor="#FFF"
-      />
-      {/* Pupil */}
-      <Box
-        x={x - pupilDiameter / 2}
-        y={y - pupilDiameter / 2}
-        width={pupilDiameter}
-        height={pupilDiameter}
-        backgroundColor="#000"
-      />
-    </>
-  );
-}
-
-interface EyebrowProps {
-  x: number;
-  y: number;
-  angle: number;
-  height: number;
-}
-
-function Eyebrow({ x, y, angle, height }: EyebrowProps) {
-  const browWidth = 10;
-  const browThickness = 2;
-  const verticalOffset = -8 - Math.round(4 * height);
-
-  // For simplicity, we'll draw a horizontal line that shifts position based on angle
-  // Negative angle = slanted down (sad), positive = slanted up (surprised/angry)
-  const leftOffset = Math.round(angle * 2);
-  const rightOffset = -Math.round(angle * 2);
-
-  return (
-    <>
-      {/* Left part of eyebrow */}
-      <Box
-        x={x - browWidth / 2}
-        y={y + verticalOffset + leftOffset}
-        width={browWidth / 2}
-        height={browThickness}
-        backgroundColor="#FFF"
-      />
-      {/* Right part of eyebrow */}
-      <Box
-        x={x}
-        y={y + verticalOffset + rightOffset}
-        width={browWidth / 2}
-        height={browThickness}
-        backgroundColor="#FFF"
-      />
-    </>
-  );
 }

@@ -4,6 +4,7 @@ import { Command } from 'commander';
 import { getEmotion, listEmotions } from './emotions';
 import { renderEmotion } from './renderer';
 import { framesToGifBase64, pushToTidbyt } from './push';
+import { writeFileSync } from 'fs';
 
 const program = new Command();
 
@@ -19,18 +20,9 @@ program
   .option('-t, --token <token>', 'Tidbyt API token (or use TIDBYT_TOKEN env)')
   .option('-d, --device-id <id>', 'Tidbyt device ID (or use TIDBYT_DEVICE_ID env)')
   .option('-i, --installation-id <id>', 'Tidbyt installation ID', 'glint')
+  .option('-p, --preview <path>', 'Save preview GIF to file instead of pushing')
   .action(async (emotionName: string, options) => {
     try {
-      // Get credentials
-      const token = options.token || process.env.TIDBYT_TOKEN;
-      const deviceId = options.deviceId || process.env.TIDBYT_DEVICE_ID;
-
-      if (!token || !deviceId) {
-        console.error('Error: TIDBYT_TOKEN and TIDBYT_DEVICE_ID are required');
-        console.error('Provide via --token/--device-id or environment variables');
-        process.exit(1);
-      }
-
       // Get emotion config
       const emotion = getEmotion(emotionName);
       console.log(`Rendering emotion: ${emotion.name}`);
@@ -41,10 +33,28 @@ program
         throw new Error('No frames rendered');
       }
 
-      // Convert to GIF and push
+      // Convert to GIF
       const imageBase64 = framesToGifBase64(frames);
-      console.log('Pushing to Tidbyt...');
+      
+      // Preview mode - save to file
+      if (options.preview) {
+        const gifBuffer = Buffer.from(imageBase64, 'base64');
+        writeFileSync(options.preview, gifBuffer);
+        console.log(`✨ Preview saved to ${options.preview}`);
+        return;
+      }
 
+      // Push mode - send to Tidbyt
+      const token = options.token || process.env.TIDBYT_TOKEN;
+      const deviceId = options.deviceId || process.env.TIDBYT_DEVICE_ID;
+
+      if (!token || !deviceId) {
+        console.error('Error: TIDBYT_TOKEN and TIDBYT_DEVICE_ID are required');
+        console.error('Provide via --token/--device-id or environment variables');
+        process.exit(1);
+      }
+
+      console.log('Pushing to Tidbyt...');
       await pushToTidbyt(imageBase64, {
         token,
         deviceId,

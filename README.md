@@ -4,7 +4,9 @@
 
 A CLI tool for AI agents (and humans) to display emotions on a Tidbyt device. No frameworks, no magic - just pixels.
 
-![neutral](assets/neutral.gif) ![happy](assets/happy.gif) ![sad](assets/sad.gif) ![angry](assets/angry.gif) ![surprised](assets/surprised.gif)
+![neutral](assets/ai-v1-neutral.gif) ![happy](assets/ai-v1-happy.gif) ![sad](assets/ai-v1-sad.gif) ![angry](assets/ai-v1-angry.gif) ![surprised](assets/ai-v1-surprised.gif)
+
+![worried](assets/ai-v1-worried.gif) ![sleepy](assets/ai-v1-sleepy.gif) ![excited](assets/ai-v1-excited.gif) ![confused](assets/ai-v1-confused.gif) ![focused](assets/ai-v1-focused.gif)
 
 ---
 

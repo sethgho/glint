@@ -1,4 +1,5 @@
 import GIFEncoder from 'gif-encoder-2';
+import sharp from 'sharp';
 import { WIDTH, HEIGHT } from './canvas';
 
 /**
@@ -10,6 +11,29 @@ export function bufferToGifBase64(buffer: Buffer): string {
   encoder.setRepeat(0);
   encoder.start();
   encoder.addFrame(buffer);
+  encoder.finish();
+  return encoder.out.getData().toString('base64');
+}
+
+/**
+ * Convert PNG buffer to GIF base64 for Tidbyt
+ */
+export async function pngToGifBase64(pngBuffer: Buffer): Promise<string> {
+  // Extract raw RGBA pixels from PNG
+  const { data, info } = await sharp(pngBuffer)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  
+  if (info.width !== WIDTH || info.height !== HEIGHT) {
+    throw new Error(`Image must be ${WIDTH}x${HEIGHT}, got ${info.width}x${info.height}`);
+  }
+  
+  const encoder = new GIFEncoder(WIDTH, HEIGHT);
+  encoder.setDelay(75);
+  encoder.setRepeat(0);
+  encoder.start();
+  encoder.addFrame(data);
   encoder.finish();
   return encoder.out.getData().toString('base64');
 }

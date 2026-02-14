@@ -1,26 +1,17 @@
 import GIFEncoder from 'gif-encoder-2';
+import { WIDTH, HEIGHT } from './canvas';
 
 /**
- * Convert PixelBuffer frames to GIF base64
+ * Convert RGBA buffer to GIF base64
  */
-export function framesToGifBase64(frames: any[], delay: number = 75): string {
-  if (frames.length === 0) throw new Error('No frames to encode');
-  
-  const width = frames[0].width;
-  const height = frames[0].height;
-  
-  const encoder = new GIFEncoder(width, height);
-  encoder.setDelay(delay);
-  encoder.setRepeat(0); // 0 = loop forever
+export function bufferToGifBase64(buffer: Buffer): string {
+  const encoder = new GIFEncoder(WIDTH, HEIGHT);
+  encoder.setDelay(75);
+  encoder.setRepeat(0);
   encoder.start();
-  
-  for (const frame of frames) {
-    encoder.addFrame(Buffer.from(frame.data));
-  }
-  
+  encoder.addFrame(buffer);
   encoder.finish();
-  const buf = encoder.out.getData();
-  return buf.toString('base64');
+  return encoder.out.getData().toString('base64');
 }
 
 /**
@@ -47,15 +38,13 @@ export async function pushToTidbyt(
       body: JSON.stringify({
         image: imageBase64,
         installationID: installationId,
-        background: false, // Show immediately
+        background: false,
       }),
     }
   );
 
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new Error(
-      `Tidbyt push failed: ${res.status} ${res.statusText} ${text}`
-    );
+    throw new Error(`Tidbyt push failed: ${res.status} ${res.statusText} ${text}`);
   }
 }

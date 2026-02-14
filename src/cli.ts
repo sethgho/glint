@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { getEmotion, listEmotions } from './emotions';
-import { renderEmotion } from './renderer';
-import { framesToGifBase64, pushToTidbyt } from './push';
 import { writeFileSync } from 'fs';
+import { getEmotion, listEmotions } from './emotions';
+import { drawEmotion } from './draw';
+import { bufferToGifBase64, pushToTidbyt } from './push';
 
 const program = new Command();
 
 program
   .name('glint')
   .description('Express emotional status on a Tidbyt display via eyes & eyebrows')
-  .version('0.1.0');
+  .version('0.2.0');
 
 program
   .command('show')
@@ -23,20 +23,14 @@ program
   .option('-p, --preview <path>', 'Save preview GIF to file instead of pushing')
   .action(async (emotionName: string, options) => {
     try {
-      // Get emotion config
       const emotion = getEmotion(emotionName);
-      console.log(`Rendering emotion: ${emotion.name}`);
+      console.log(`Drawing emotion: ${emotion.name}`);
 
-      // Render
-      const frames = await renderEmotion(emotion);
-      if (frames.length === 0) {
-        throw new Error('No frames rendered');
-      }
-
-      // Convert to GIF
-      const imageBase64 = framesToGifBase64(frames);
+      // Draw the emotion
+      const canvas = drawEmotion(emotion);
+      const imageBase64 = bufferToGifBase64(canvas.toBuffer());
       
-      // Preview mode - save to file
+      // Preview mode
       if (options.preview) {
         const gifBuffer = Buffer.from(imageBase64, 'base64');
         writeFileSync(options.preview, gifBuffer);
@@ -44,7 +38,7 @@ program
         return;
       }
 
-      // Push mode - send to Tidbyt
+      // Push mode
       const token = options.token || process.env.TIDBYT_TOKEN;
       const deviceId = options.deviceId || process.env.TIDBYT_DEVICE_ID;
 

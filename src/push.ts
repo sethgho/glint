@@ -18,9 +18,35 @@ export function bufferToGifBase64(buffer: Buffer): string {
 /**
  * Convert PNG buffer to GIF base64 for Tidbyt
  */
-export async function pngToGifBase64(pngBuffer: Buffer): Promise<string> {
+export async function pngToGifBase64(pngBuffer: Buffer, label?: string): Promise<string> {
+  let image = sharp(pngBuffer);
+  
+  // Add text label if provided
+  if (label) {
+    // Create SVG text overlay - tiny font for 64x32 display
+    const svgText = `
+      <svg width="${WIDTH}" height="${HEIGHT}">
+        <style>
+          .label { 
+            fill: white; 
+            font-size: 8px; 
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+          }
+        </style>
+        <text x="50%" y="${HEIGHT - 2}" text-anchor="middle" class="label">${label}</text>
+      </svg>
+    `;
+    
+    image = image.composite([{
+      input: Buffer.from(svgText),
+      top: 0,
+      left: 0,
+    }]);
+  }
+  
   // Extract raw RGBA pixels from PNG
-  const { data, info } = await sharp(pngBuffer)
+  const { data, info } = await image
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });

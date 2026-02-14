@@ -33,7 +33,7 @@ program
       if (style.type === 'image') {
         // Load pre-rendered image
         const pngBuffer = await loadEmotionImage(style.name, emotionName);
-        imageBase64 = await pngToGifBase64(pngBuffer);
+        imageBase64 = await pngToGifBase64(pngBuffer, emotionName);
       } else {
         // Programmatic drawing
         const emotion = getEmotion(emotionName);

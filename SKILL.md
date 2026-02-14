@@ -1,99 +1,73 @@
 ---
 name: glint
 description: >
-  Express emotional status on Tidbyt displays via eyes & eyebrows.
+  Express emotional status on Tidbyt displays via animated eyes & eyebrows.
 
   TRIGGER THIS SKILL WHEN:
   - Agent wants to express their current emotional state visually
   - User asks to show an emotion on the Tidbyt
-  - Agent needs to signal status (happy = success, worried = alert, focused = working, etc.)
+  - Agent needs to signal status (happy = success, worried = alert, focused = working)
   - Creating ambient awareness of agent activity/mood
 
   DON'T USE THIS SKILL WHEN:
-  - Displaying complex information (use typlit for full apps)
-  - Need detailed text or charts
-  - Just pushing a static image (use tidbyt skill)
+  - Displaying text, charts, or complex information → use typlit
+  - Just pushing a static image file → use tidbyt skill directly
+  - Need animations beyond static eyes → future glint feature
 
-  This skill is for emotional expression via eyes/eyebrows only.
+  For emotional expression via eyes/eyebrows only.
 ---
 
 # glint
 
 **Express emotional status on IoT displays via eyes & eyebrows**
 
-## Installation
+![neutral](assets/neutral.gif) ![happy](assets/happy.gif) ![angry](assets/angry.gif) ![sad](assets/sad.gif) ![surprised](assets/surprised.gif)
+
+## Quick Start
 
 ```bash
-# Clone and install
-git clone git@github.com:sethgho/glint.git
-cd glint
-bun install
-
-# Set environment variables
+cd /path/to/glint
 export TIDBYT_TOKEN=your_token
 export TIDBYT_DEVICE_ID=your_device_id
-```
 
-## Usage
-
-### List Available Emotions
-
-```bash
-bun run src/cli.ts list
-```
-
-### Display an Emotion
-
-```bash
-# Using environment variables
+# Show an emotion
 bun run src/cli.ts show happy
-
-# Using command-line flags
-bun run src/cli.ts show worried --token xxx --device-id yyy
-
-# With custom installation ID
-bun run src/cli.ts show excited --installation-id my-glint
 ```
 
 ## Available Emotions
 
-Each emotion is defined by eye openness, eyebrow angle/height, and pupil size:
+| Emotion | Preview | Description | Agent Use Case |
+|---------|---------|-------------|----------------|
+| `neutral` | ![](assets/neutral.gif) | Calm, default state | Idle, waiting |
+| `happy` | ![](assets/happy.gif) | Pleased, content | Task success |
+| `sad` | ![](assets/sad.gif) | Disappointed | Task failure |
+| `angry` | ![](assets/angry.gif) | Frustrated, alert | Critical error |
+| `surprised` | ![](assets/surprised.gif) | Startled, amazed | Unexpected result |
+| `worried` | ![](assets/worried.gif) | Concerned | Warning state |
+| `sleepy` | ![](assets/sleepy.gif) | Tired, low energy | Low activity |
+| `excited` | ![](assets/excited.gif) | Eager, energetic | Important event |
+| `confused` | ![](assets/confused.gif) | Uncertain | Needs clarification |
+| `focused` | ![](assets/focused.gif) | Concentrated | Working on task |
 
-| Emotion   | Use Case                                    |
-|-----------|---------------------------------------------|
-| neutral   | Default state, idle, calm                   |
-| happy     | Task completed successfully                 |
-| sad       | Error or failure                            |
-| angry     | Critical error, system issue                |
-| surprised | Unexpected result                           |
-| worried   | Warning, potential issue                    |
-| sleepy    | Low activity, power-saving mode             |
-| excited   | High activity, important event              |
-| confused  | Unclear input, needs clarification          |
-| focused   | Working on a task, processing               |
+## Usage Patterns
 
-## Agent Workflow
-
-1. **Determine emotion** - Map agent state to an emotion
-2. **Execute CLI** - Run `bun run src/cli.ts show <emotion>`
-3. **Confirm** - CLI will output success message
-
-## Example Agent Use Cases
-
-### Task Status Updates
+### Task Status
 
 ```bash
 # Starting work
 bun run src/cli.ts show focused
 
-# Task completed successfully
+# Success
 bun run src/cli.ts show happy
 
-# Error encountered
+# Error
 bun run src/cli.ts show worried
+
+# Critical failure
+bun run src/cli.ts show angry
 ```
 
-### Ambient Awareness
+### Ambient Presence
 
 ```bash
 # Idle state
@@ -102,54 +76,69 @@ bun run src/cli.ts show neutral
 # Active processing
 bun run src/cli.ts show focused
 
-# Waiting for user input
+# Waiting for input
 bun run src/cli.ts show sleepy
 ```
 
-### Event Notifications
+### Event Reactions
 
 ```bash
-# Important event detected
+# Something exciting happened
 bun run src/cli.ts show excited
 
 # Unexpected data
 bun run src/cli.ts show surprised
 
-# Critical alert
-bun run src/cli.ts show angry
+# Something went wrong
+bun run src/cli.ts show sad
+```
+
+## CLI Options
+
+```bash
+bun run src/cli.ts show <emotion> [options]
+
+Arguments:
+  emotion                     One of: neutral, happy, sad, angry, surprised,
+                              worried, sleepy, excited, confused, focused
+
+Options:
+  -t, --token <token>         Tidbyt API token (or TIDBYT_TOKEN env)
+  -d, --device-id <id>        Tidbyt device ID (or TIDBYT_DEVICE_ID env)  
+  -i, --installation-id <id>  Tidbyt installation ID (default: "glint")
+  -p, --preview <path>        Save GIF to file instead of pushing
 ```
 
 ## Environment Variables
 
-**Required:**
-- `TIDBYT_TOKEN` - Tidbyt API token
-- `TIDBYT_DEVICE_ID` - Tidbyt device ID
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `TIDBYT_TOKEN` | Yes | Tidbyt API token |
+| `TIDBYT_DEVICE_ID` | Yes | Tidbyt device ID |
 
-**Optional:**
-- Installation ID can be specified via `--installation-id` flag (default: `glint`)
+## Preview Mode
 
-## Technical Details
+Test rendering without pushing to device:
 
-- **Display**: 64x32 pixel Tidbyt display
-- **Rendering**: Typlit (TypeScript/JSX)
-- **Format**: PNG pushed via Tidbyt API
-- **Positioning**: Two eyes with eyebrows, centered on display
+```bash
+bun run src/cli.ts show angry --preview /tmp/test.gif
+# Then view /tmp/test.gif
+```
 
 ## Troubleshooting
 
-### "Missing env TIDBYT_TOKEN"
-Set the required environment variables or use CLI flags.
+**"Missing TIDBYT_TOKEN"**  
+Set environment variables or use --token and --device-id flags.
 
-### "Unknown emotion: xyz"
-Run `bun run src/cli.ts list` to see available emotions.
+**"Unknown emotion: xyz"**  
+Run `bun run src/cli.ts list` to see valid emotions.
 
-### "Tidbyt push failed"
-Check API token and device ID validity. Ensure network connectivity.
+**"Tidbyt push failed: 401"**  
+Check your API token is valid and not expired.
 
-## Roadmap
+## Technical Details
 
-Future enhancements planned:
-- Multiple art styles (pixel, realistic, cartoon)
-- Animation support (blinking, eye movement)
-- More granular emotion parameters
-- Support for other IoT displays beyond Tidbyt
+- **Display**: 64×32 pixels (Tidbyt native resolution)
+- **Format**: GIF (single frame)
+- **No dependencies on React/Typlit** - raw pixel manipulation
+- **Architecture**: emotions.ts → draw.ts → canvas.ts → GIF → API

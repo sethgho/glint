@@ -21,27 +21,24 @@ export function bufferToGifBase64(buffer: Buffer): string {
 export async function pngToGifBase64(pngBuffer: Buffer, label?: string): Promise<string> {
   let image = sharp(pngBuffer);
   
-  // Add text label if provided
+  // Add crisp pixel text label if provided
   if (label) {
-    // Create SVG text overlay - tiny font for 64x32 display
-    const svgText = `
-      <svg width="${WIDTH}" height="${HEIGHT}">
-        <style>
-          .label { 
-            fill: white; 
-            font-size: 8px; 
-            font-family: Arial, sans-serif;
-            font-weight: bold;
-          }
-        </style>
-        <text x="50%" y="${HEIGHT - 2}" text-anchor="middle" class="label">${label}</text>
-      </svg>
-    `;
+    const { renderPixelText, getTextWidth, CHAR_HEIGHT } = await import('./pixelfont');
+    const { buffer: textBuffer, width: textWidth, height: textHeight } = renderPixelText(label);
+    
+    // Center text horizontally, place at bottom
+    const textX = Math.floor((WIDTH - textWidth) / 2);
+    const textY = HEIGHT - CHAR_HEIGHT - 1;
     
     image = image.composite([{
-      input: Buffer.from(svgText),
-      top: 0,
-      left: 0,
+      input: textBuffer,
+      raw: {
+        width: textWidth,
+        height: textHeight,
+        channels: 4,
+      },
+      top: textY,
+      left: textX,
     }]);
   }
   

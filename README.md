@@ -1,69 +1,93 @@
-# glint ✨
+<div align="center">
 
-**Express emotional status on IoT displays via animated eyes & eyebrows**
+# ✨ glint
 
-A CLI tool for AI agents (and humans) to display emotions on a Tidbyt device. No frameworks, no magic - just pixels.
+### Give your AI agent a face.
 
-![neutral](assets/ai-v1-neutral.gif) ![happy](assets/ai-v1-happy.gif) ![sad](assets/ai-v1-sad.gif) ![angry](assets/ai-v1-angry.gif) ![surprised](assets/ai-v1-surprised.gif)
+**glint** renders expressive pixel-art emotions on [Tidbyt](https://tidbyt.com) displays — so you can *see* how your agent is feeling at a glance.
 
-![worried](assets/ai-v1-worried.gif) ![sleepy](assets/ai-v1-sleepy.gif) ![excited](assets/ai-v1-excited.gif) ![confused](assets/ai-v1-confused.gif) ![focused](assets/ai-v1-focused.gif)
+<br>
+
+<img src="assets/readme/ai-v1/excited.png" width="384" alt="glint — excited eyes on a Tidbyt display">
+
+<br>
+<br>
+
+No frameworks. No magic. Just pixels and personality.
+
+[Get Started](#installation) · [Emotions](#emotions) · [Styles](#styles) · [Agent Integration](#for-ai-agents)
+
+</div>
 
 ---
 
-## For Humans
+## Why glint?
 
-### Installation
+AI agents are invisible by default. They run in terminals, in the cloud, in the background — and you have no idea what they're doing or how they're "feeling."
+
+**glint changes that.** It gives agents a physical presence: a pair of expressive eyes on a tiny LED display. Happy when a task succeeds. Worried when something's uncertain. Focused when deep in work.
+
+It's simple, it's delightful, and it makes your agent feel *real*.
+
+---
+
+## Installation
 
 ```bash
-# Clone and install
 git clone https://github.com/sethgho/glint.git
 cd glint
 bun install
-
-# Build (optional, for global install)
-bun run build
 ```
 
-### Setup
+## Setup
 
-1. Get your Tidbyt API credentials from the Tidbyt mobile app:
-   - Open Settings → General → Get API Key
-   - Copy your **API Token** and **Device ID**
+1. Grab your Tidbyt credentials from the mobile app: **Settings → General → Get API Key**
 
-2. Set environment variables:
+2. Option A — environment variables:
 ```bash
-export TIDBYT_TOKEN=your_token_here
-export TIDBYT_DEVICE_ID=your_device_id_here
+export TIDBYT_TOKEN=your_token
+export TIDBYT_DEVICE_ID=your_device_id
 ```
 
-### Usage
+   Option B — config file (recommended):
+```bash
+mkdir -p ~/.config/glint
+cat > ~/.config/glint/config.json <<EOF
+{
+  "token": "your_token",
+  "deviceId": "your_device_id",
+  "style": "ai-v1",
+  "installationId": "glint"
+}
+EOF
+```
+
+CLI flags override config, which overrides env vars.
+
+## Usage
 
 ```bash
-# List available emotions
+# Show an emotion
+bun run src/cli.ts show excited
+
+# Preview locally (saves a GIF)
+bun run src/cli.ts show happy --preview /tmp/happy.gif
+
+# Switch styles
+bun run src/cli.ts show happy --style pixel-art
+
+# List everything
 bun run src/cli.ts list
-
-# Show an emotion on your Tidbyt
-bun run src/cli.ts show happy
-
-# Preview without pushing (saves GIF)
-bun run src/cli.ts show happy --preview /tmp/test.gif
-
-# Use programmatic style instead of AI-generated
-bun run src/cli.ts show happy --style default
-
-# List available styles
 bun run src/cli.ts styles
 ```
 
 ### CLI Reference
 
-```bash
+```
 glint show <emotion> [options]
-
-Options:
-  -s, --style <style>         Visual style (ai-v1, default)
-  -t, --token <token>         Tidbyt API token (or TIDBYT_TOKEN env)
-  -d, --device-id <id>        Tidbyt device ID (or TIDBYT_DEVICE_ID env)
+  -s, --style <style>         Visual style (default: from config or ai-v1)
+  -t, --token <token>         Tidbyt API token
+  -d, --device-id <id>        Tidbyt device ID
   -i, --installation-id <id>  Installation ID (default: "glint")
   -p, --preview <path>        Save GIF preview instead of pushing
 
@@ -71,128 +95,124 @@ glint list                    List available emotions
 glint styles                  List available visual styles
 ```
 
+### Configuration
+
+glint reads defaults from `~/.config/glint/config.json`:
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `token` | string | Tidbyt API token |
+| `deviceId` | string | Tidbyt device ID |
+| `style` | string | Default visual style |
+| `installationId` | string | Installation ID for Tidbyt |
+
+Priority: **CLI flags → config file → environment variables → built-in defaults**
+
+---
+
+## Emotions
+
+Ten distinct states, each designed to be instantly readable on a 64×32 LED matrix:
+
+| Emotion | When to use it |
+|---------|---------------|
+| `neutral` | Idle, default state |
+| `happy` | Task completed, good news |
+| `sad` | Something went wrong |
+| `angry` | Critical failure, frustration |
+| `surprised` | Unexpected discovery |
+| `worried` | Uncertainty, potential problems |
+| `sleepy` | Low activity, winding down |
+| `excited` | Breakthroughs, anticipation |
+| `confused` | Unclear requirements |
+| `focused` | Deep work, concentration |
+
+---
+
+## Styles
+
+### `ai-v1` — AI-Generated Cartoon Eyes *(default)*
+
+Soft, expressive cartoon eyes generated with Flux. The most readable style at Tidbyt's native resolution.
+
+| | | | | |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="assets/readme/ai-v1/neutral.png" width="128"><br>neutral | <img src="assets/readme/ai-v1/happy.png" width="128"><br>happy | <img src="assets/readme/ai-v1/sad.png" width="128"><br>sad | <img src="assets/readme/ai-v1/angry.png" width="128"><br>angry | <img src="assets/readme/ai-v1/surprised.png" width="128"><br>surprised |
+| <img src="assets/readme/ai-v1/worried.png" width="128"><br>worried | <img src="assets/readme/ai-v1/sleepy.png" width="128"><br>sleepy | <img src="assets/readme/ai-v1/excited.png" width="128"><br>excited | <img src="assets/readme/ai-v1/confused.png" width="128"><br>confused | <img src="assets/readme/ai-v1/focused.png" width="128"><br>focused |
+
+### `anime` — Anime-Style Eyes
+
+Vibrant, sparkle-filled eyes inspired by anime aesthetics.
+
+| | | | | |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="assets/readme/anime/neutral.png" width="128"><br>neutral | <img src="assets/readme/anime/happy.png" width="128"><br>happy | <img src="assets/readme/anime/sad.png" width="128"><br>sad | <img src="assets/readme/anime/angry.png" width="128"><br>angry | <img src="assets/readme/anime/surprised.png" width="128"><br>surprised |
+| <img src="assets/readme/anime/worried.png" width="128"><br>worried | <img src="assets/readme/anime/sleepy.png" width="128"><br>sleepy | <img src="assets/readme/anime/excited.png" width="128"><br>excited | <img src="assets/readme/anime/confused.png" width="128"><br>confused | <img src="assets/readme/anime/focused.png" width="128"><br>focused |
+
+### `pixel-art` — Retro Pixel Art
+
+Chunky, bold pixel art with a retro game aesthetic.
+
+| | | | | |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="assets/readme/pixel-art/neutral.png" width="128"><br>neutral | <img src="assets/readme/pixel-art/happy.png" width="128"><br>happy | <img src="assets/readme/pixel-art/sad.png" width="128"><br>sad | <img src="assets/readme/pixel-art/angry.png" width="128"><br>angry | <img src="assets/readme/pixel-art/surprised.png" width="128"><br>surprised |
+| <img src="assets/readme/pixel-art/worried.png" width="128"><br>worried | <img src="assets/readme/pixel-art/sleepy.png" width="128"><br>sleepy | <img src="assets/readme/pixel-art/excited.png" width="128"><br>excited | <img src="assets/readme/pixel-art/confused.png" width="128"><br>confused | <img src="assets/readme/pixel-art/focused.png" width="128"><br>focused |
+
+### `default` — Programmatic
+
+Simple geometric eyes and eyebrows drawn entirely in code. No external assets needed.
+
+| | | | | |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="assets/readme/default/neutral.png" width="128"><br>neutral | <img src="assets/readme/default/happy.png" width="128"><br>happy | <img src="assets/readme/default/sad.png" width="128"><br>sad | <img src="assets/readme/default/angry.png" width="128"><br>angry | <img src="assets/readme/default/surprised.png" width="128"><br>surprised |
+| <img src="assets/readme/default/worried.png" width="128"><br>worried | <img src="assets/readme/default/sleepy.png" width="128"><br>sleepy | <img src="assets/readme/default/excited.png" width="128"><br>excited | <img src="assets/readme/default/confused.png" width="128"><br>confused | <img src="assets/readme/default/focused.png" width="128"><br>focused |
+
 ---
 
 ## For AI Agents
 
-glint is designed for AI agents to express their emotional/cognitive state on a physical display, giving humans visibility into the agent's current state.
+glint is built for AI agents to express their emotional/cognitive state on a physical display. It gives humans ambient visibility into what the agent is doing.
 
-### Quick Start
+### Quick Integration
 
-1. **Install glint** in your workspace:
-```bash
-git clone https://github.com/sethgho/glint.git /path/to/workspace/glint
-cd /path/to/workspace/glint
-bun install
-```
-
-2. **Add the skill** to your agent configuration by referencing `SKILL.md`:
-```
-/path/to/workspace/glint/SKILL.md
-```
-
-3. **Document in your TOOLS.md** (or equivalent):
-```markdown
-## Tidbyt Status Display
-- **Tool:** glint at /path/to/glint
-- **Usage:** `cd /path/to/glint && bun run src/cli.ts show <emotion>`
-- **Emotions:** neutral, happy, sad, angry, surprised, worried, sleepy, excited, confused, focused
-- **Update when:** State changes significantly (task start, completion, errors, discoveries)
-```
-
-4. **Add to your memory/guidance** to update proactively:
-```markdown
-Update the Tidbyt display when my cognitive/emotional state changes.
-```
+1. **Install** glint in your agent's workspace
+2. **Configure** `~/.config/glint/config.json` with your Tidbyt credentials
+3. **Call** `glint show <emotion>` whenever the agent's state changes
 
 ### When to Update
 
 | Situation | Emotion |
 |-----------|---------|
 | Starting a task | `focused` or `neutral` |
-| Task completed successfully | `happy` or `excited` |
+| Task completed | `happy` or `excited` |
 | Error encountered | `worried` or `confused` |
-| Critical failure / frustration | `angry` |
+| Critical failure | `angry` |
 | Unexpected discovery | `surprised` |
-| Waiting / idle | `neutral` or `sleepy` |
+| Idle / waiting | `neutral` or `sleepy` |
 
-### Full Skill Documentation
+### Full Agent Docs
 
-See **[SKILL.md](SKILL.md)** for complete agent integration instructions including:
-- Skill trigger conditions
-- State transition examples
-- Proactive update guidelines
-- Credential management
-- Troubleshooting
+See **[SKILL.md](SKILL.md)** for complete integration instructions including skill triggers, state transitions, and credential management.
 
 ---
 
-## Emotions
-
-| Emotion | Eyes | Eyebrows | Use Case |
-|---------|------|----------|----------|
-| `neutral` | normal | level | Idle, default state |
-| `happy` | slightly closed | raised | Success, good news |
-| `sad` | half-closed | droopy | Errors, failures |
-| `angry` | wide, small pupils | furrowed | Critical alerts, frustration |
-| `surprised` | wide open | raised high | Unexpected events |
-| `worried` | normal | slightly droopy | Warnings, uncertainty |
-| `sleepy` | nearly closed | level | Low activity, idle |
-| `excited` | wide, big pupils | raised | Important events, breakthroughs |
-| `confused` | normal | slightly raised | Unclear input |
-| `focused` | normal, small pupils | slightly furrowed | Working, processing |
-
-## Styles
-
-| Style | Description |
-|-------|-------------|
-| `ai-v1` | AI-generated cartoon eyes (default) |
-| `default` | Programmatic simple eyes with eyebrows |
-
-The display shows the emotion name as a label below the eyes for easier interpretation.
-
 ## Architecture
 
-No React, no Typlit, no frameworks. Just straightforward pixel manipulation:
-
 ```
-emotions.ts    →    draw.ts    →    canvas.ts    →    GIF encoder    →    Tidbyt API
-   (config)      (render logic)   (pixel buffer)      (encoding)          (push)
+emotions.ts  →  draw.ts  →  canvas.ts  →  GIF encoder  →  Tidbyt API
+   (config)    (render)    (pixel buf)     (encode)         (push)
 
-styles.ts      →    assets/     →    sharp        →    GIF encoder    →    Tidbyt API
-  (style mgmt)    (AI images)     (compositing)       (encoding)          (push)
+styles.ts    →  assets/  →  sharp     →  GIF encoder  →  Tidbyt API
+  (registry)   (images)   (composite)    (encode)         (push)
 ```
 
-- **canvas.ts** - 64×32 RGBA buffer with pixel drawing primitives
-- **draw.ts** - Converts emotion config to pixel art (programmatic style)
-- **emotions.ts** - Defines the 10 emotions with eye/brow parameters
-- **styles.ts** - Manages visual styles (programmatic vs image-based)
-- **pixelfont.ts** - Crisp 3×5 pixel font for LED displays
-- **push.ts** - GIF encoding and Tidbyt API integration
-
-## Development
-
-```bash
-# Install dependencies
-bun install
-
-# Test rendering (preview mode)
-bun run src/cli.ts show happy --preview /tmp/test.gif
-
-# Build for distribution
-bun run build
-
-# List emotions/styles
-bun run src/cli.ts list
-bun run src/cli.ts styles
-```
-
-## Environment Variables
-
-| Variable | Description |
-|----------|-------------|
-| `TIDBYT_TOKEN` | Your Tidbyt API token |
-| `TIDBYT_DEVICE_ID` | Your Tidbyt device ID |
+- **canvas.ts** — 64×32 RGBA buffer with pixel drawing primitives
+- **draw.ts** — Converts emotion config to pixel art (programmatic style)
+- **emotions.ts** — Defines the 10 emotions with eye/brow parameters
+- **styles.ts** — Manages visual styles (programmatic vs image-based)
+- **config.ts** — Reads `~/.config/glint/config.json` for defaults
+- **pixelfont.ts** — Crisp 3×5 pixel font for LED displays
+- **push.ts** — GIF encoding and Tidbyt API integration
 
 ## License
 

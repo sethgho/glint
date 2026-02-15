@@ -6,6 +6,7 @@ import { getEmotion, listEmotions } from './emotions';
 import { drawEmotion } from './draw';
 import { bufferToGifBase64, pngToGifBase64, pushToTidbyt } from './push';
 import { getStyle, listStyles, loadEmotionImage, listStyleEmotions } from './styles';
+import { resolve } from './config';
 
 const program = new Command();
 
@@ -18,30 +19,28 @@ program
   .command('show')
   .description('Display an emotion on your Tidbyt')
   .argument('<emotion>', 'emotion to display (e.g., happy, sad, angry)')
-  .option('-s, --style <style>', 'visual style (default, ai-v1)', 'ai-v1')
+  .option('-s, --style <style>', 'visual style (default, ai-v1)')
   .option('-t, --token <token>', 'Tidbyt API token (or use TIDBYT_TOKEN env)')
   .option('-d, --device-id <id>', 'Tidbyt device ID (or use TIDBYT_DEVICE_ID env)')
-  .option('-i, --installation-id <id>', 'Tidbyt installation ID', 'glint')
+  .option('-i, --installation-id <id>', 'Tidbyt installation ID')
   .option('-p, --preview <path>', 'Save preview GIF to file instead of pushing')
   .action(async (emotionName: string, options) => {
     try {
-      const style = getStyle(options.style);
+      const styleName = resolve(options.style, 'style', undefined, 'ai-v1')!;
+      const style = getStyle(styleName);
       console.log(`Style: ${style.name} | Emotion: ${emotionName}`);
 
       let imageBase64: string;
 
       if (style.type === 'image') {
-        // Load pre-rendered image
         const pngBuffer = await loadEmotionImage(style.name, emotionName);
         imageBase64 = await pngToGifBase64(pngBuffer, emotionName);
       } else {
-        // Programmatic drawing
         const emotion = getEmotion(emotionName);
         const canvas = drawEmotion(emotion);
         imageBase64 = bufferToGifBase64(canvas.toBuffer());
       }
       
-      // Preview mode
       if (options.preview) {
         const gifBuffer = Buffer.from(imageBase64, 'base64');
         writeFileSync(options.preview, gifBuffer);
@@ -49,13 +48,13 @@ program
         return;
       }
 
-      // Push mode
-      const token = options.token || process.env.TIDBYT_TOKEN;
-      const deviceId = options.deviceId || process.env.TIDBYT_DEVICE_ID;
+      const token = resolve(options.token, 'token', 'TIDBYT_TOKEN');
+      const deviceId = resolve(options.deviceId, 'deviceId', 'TIDBYT_DEVICE_ID');
+      const installationId = resolve(options.installationId, 'installationId', undefined, 'glint')!;
 
       if (!token || !deviceId) {
-        console.error('Error: TIDBYT_TOKEN and TIDBYT_DEVICE_ID are required');
-        console.error('Provide via --token/--device-id or environment variables');
+        console.error('Error: Tidbyt token and device ID are required.');
+        console.error('Provide via CLI flags, ~/.config/glint/config.json, or environment variables.');
         process.exit(1);
       }
 
@@ -63,7 +62,7 @@ program
       await pushToTidbyt(imageBase64, {
         token,
         deviceId,
-        installationId: options.installationId,
+        installationId,
       });
 
       console.log(`✨ Emotion "${emotionName}" displayed successfully`);

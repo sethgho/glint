@@ -34,6 +34,11 @@ export const STYLES: Record<string, Style> = {
     type: 'image',
     description: 'Anime-style eyes with sparkles and vibrant colors',
   },
+  'pixel-art': {
+    name: 'pixel-art',
+    type: 'image',
+    description: 'Retro pixel-art game-style eyes with chunky pixels and bold outlines',
+  },
 };
 
 export function listStyles(): Style[] {

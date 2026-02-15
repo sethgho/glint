@@ -6,9 +6,11 @@ import sharp from 'sharp';
 import { existsSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { homedir } from 'os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ASSETS_DIR = join(__dirname, '../assets');
+const USER_STYLES_DIR = join(homedir(), '.config', 'glint', 'styles');
 
 export type StyleType = 'programmatic' | 'image';
 
@@ -16,9 +18,10 @@ export interface Style {
   name: string;
   type: StyleType;
   description: string;
+  userStyle?: boolean;
 }
 
-export const STYLES: Record<string, Style> = {
+export const BUILTIN_STYLES: Record<string, Style> = {
   'default': {
     name: 'default',
     type: 'programmatic',
@@ -41,16 +44,65 @@ export const STYLES: Record<string, Style> = {
   },
 };
 
+// Keep STYLES as alias for backward compat
+export const STYLES = BUILTIN_STYLES;
+
+/**
+ * Discover user styles from ~/.config/glint/styles/
+ */
+export function discoverUserStyles(): Record<string, Style> {
+  const userStyles: Record<string, Style> = {};
+
+  if (!existsSync(USER_STYLES_DIR)) {
+    return userStyles;
+  }
+
+  try {
+    const entries = readdirSync(USER_STYLES_DIR, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const styleDir = join(USER_STYLES_DIR, entry.name);
+      const pngs = readdirSync(styleDir).filter(f => f.endsWith('.png'));
+      if (pngs.length > 0) {
+        userStyles[entry.name] = {
+          name: entry.name,
+          type: 'image',
+          description: `User style (${pngs.length} emotions)`,
+          userStyle: true,
+        };
+      }
+    }
+  } catch {
+    // Ignore errors reading user styles dir
+  }
+
+  return userStyles;
+}
+
 export function listStyles(): Style[] {
-  return Object.values(STYLES);
+  return [...Object.values(BUILTIN_STYLES), ...Object.values(discoverUserStyles())];
 }
 
 export function getStyle(name: string): Style {
-  const style = STYLES[name];
-  if (!style) {
-    throw new Error(`Unknown style: ${name}. Available: ${Object.keys(STYLES).join(', ')}`);
+  const builtin = BUILTIN_STYLES[name];
+  if (builtin) return builtin;
+
+  const userStyles = discoverUserStyles();
+  const user = userStyles[name];
+  if (user) return user;
+
+  const all = [...Object.keys(BUILTIN_STYLES), ...Object.keys(userStyles)];
+  throw new Error(`Unknown style: ${name}. Available: ${all.join(', ')}`);
+}
+
+/**
+ * Get the directory path for a style's assets
+ */
+export function getStyleDir(style: Style): string {
+  if (style.userStyle) {
+    return join(USER_STYLES_DIR, style.name);
   }
-  return style;
+  return join(ASSETS_DIR, style.name);
 }
 
 /**
@@ -59,23 +111,22 @@ export function getStyle(name: string): Style {
  */
 export async function loadEmotionImage(styleName: string, emotionName: string): Promise<Buffer> {
   const style = getStyle(styleName);
-  
+
   if (style.type !== 'image') {
     throw new Error(`Style "${styleName}" is not image-based`);
   }
-  
-  const assetPath = join(ASSETS_DIR, styleName, `${emotionName}.png`);
-  
+
+  const assetPath = join(getStyleDir(style), `${emotionName}.png`);
+
   if (!existsSync(assetPath)) {
     throw new Error(`No image found for emotion "${emotionName}" in style "${styleName}"`);
   }
-  
-  // Load and ensure correct size
+
   const buffer = await sharp(assetPath)
     .resize(64, 32, { fit: 'fill' })
     .png()
     .toBuffer();
-  
+
   return buffer;
 }
 
@@ -84,18 +135,20 @@ export async function loadEmotionImage(styleName: string, emotionName: string): 
  */
 export function listStyleEmotions(styleName: string): string[] {
   const style = getStyle(styleName);
-  
+
   if (style.type !== 'image') {
-    return []; // Programmatic styles define emotions differently
+    return [];
   }
-  
-  const styleDir = join(ASSETS_DIR, styleName);
-  
+
+  const styleDir = getStyleDir(style);
+
   if (!existsSync(styleDir)) {
     return [];
   }
-  
+
   return readdirSync(styleDir)
     .filter(f => f.endsWith('.png'))
     .map(f => f.replace('.png', ''));
 }
+
+export { USER_STYLES_DIR };

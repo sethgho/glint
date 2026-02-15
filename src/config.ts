@@ -8,11 +8,18 @@ import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 
+export interface GenerateConfig {
+  provider?: string;
+  model?: string;
+  promptTemplate?: string;
+}
+
 export interface GlintConfig {
   token?: string;
   deviceId?: string;
   style?: string;
   installationId?: string;
+  generate?: GenerateConfig;
 }
 
 const CONFIG_DIR = join(homedir(), '.config', 'glint');

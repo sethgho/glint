@@ -93,6 +93,8 @@ glint show <emotion> [options]
 
 glint list                    List available emotions
 glint styles                  List available visual styles
+glint validate <style>        Validate a style directory
+glint generate <style-name>   Generate emotion images using AI
 ```
 
 ### Configuration
@@ -157,6 +159,35 @@ Chunky, bold pixel art with a retro game aesthetic.
 |:---:|:---:|:---:|:---:|:---:|
 | <img src="assets/readme/pixel-art/neutral.png" width="128"><br>neutral | <img src="assets/readme/pixel-art/happy.png" width="128"><br>happy | <img src="assets/readme/pixel-art/sad.png" width="128"><br>sad | <img src="assets/readme/pixel-art/angry.png" width="128"><br>angry | <img src="assets/readme/pixel-art/surprised.png" width="128"><br>surprised |
 | <img src="assets/readme/pixel-art/worried.png" width="128"><br>worried | <img src="assets/readme/pixel-art/sleepy.png" width="128"><br>sleepy | <img src="assets/readme/pixel-art/excited.png" width="128"><br>excited | <img src="assets/readme/pixel-art/confused.png" width="128"><br>confused | <img src="assets/readme/pixel-art/focused.png" width="128"><br>focused |
+
+### Custom User Styles
+
+You can create your own styles by placing emotion PNGs in `~/.config/glint/styles/<style-name>/`. Each directory needs 10 PNG files (one per emotion, 64×32 pixels): `neutral.png`, `happy.png`, `sad.png`, `angry.png`, `surprised.png`, `worried.png`, `sleepy.png`, `excited.png`, `confused.png`, `focused.png`.
+
+User styles appear automatically in `glint styles` with a "(user)" indicator and can be referenced by name just like built-in styles.
+
+```bash
+# Validate your style
+glint validate my-custom-style
+
+# Generate a style using AI
+glint generate my-new-style
+
+# Use it
+glint show happy --style my-custom-style
+```
+
+The `generate` command uses Replicate (set `REPLICATE_API_TOKEN`) to create all 10 emotions. Configure the provider, model, and prompt template in `~/.config/glint/config.json`:
+
+```json
+{
+  "generate": {
+    "provider": "replicate",
+    "model": "black-forest-labs/flux-schnell",
+    "promptTemplate": "Cartoon expressive {emotion} eyes on pure black background, 64x32 pixel art for LED display, simple and readable"
+  }
+}
+```
 
 ### `default` — Programmatic
 

@@ -207,24 +207,39 @@ program
       const sharp = (await import('sharp')).default;
 
       for (const emotion of REQUIRED_EMOTIONS) {
+        const outFile = join(outputDir, `${emotion}.png`);
+        if (existsSync(outFile) && (await import('fs')).statSync(outFile).size > 200) {
+          console.log(`  Skipping ${emotion} (already exists)`);
+          continue;
+        }
         const prompt = promptTemplate.replace(/\{emotion\}/g, emotion);
         console.log(`  Generating ${emotion}...`);
 
-        // Create prediction
-        const createRes = await fetch('https://api.replicate.com/v1/predictions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${apiToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model,
-            input: { prompt, num_outputs: 1 },
-          }),
-        });
+        // Create prediction (use models API for official models)
+        let createRes: Response;
+        for (let attempt = 0; attempt < 5; attempt++) {
+          createRes = await fetch(`https://api.replicate.com/v1/models/${model}/predictions`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${apiToken}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'wait',
+            },
+            body: JSON.stringify({
+              input: { prompt, num_outputs: 1 },
+            }),
+          });
+          if (createRes.status === 429) {
+            const retryAfter = parseInt(createRes.headers.get('retry-after') || '15');
+            console.log(`    Rate limited, waiting ${retryAfter}s...`);
+            await new Promise(r => setTimeout(r, retryAfter * 1000));
+            continue;
+          }
+          break;
+        }
 
-        if (!createRes.ok) {
-          throw new Error(`Replicate API error: ${createRes.status} ${await createRes.text()}`);
+        if (!createRes!.ok) {
+          throw new Error(`Replicate API error: ${createRes!.status} ${await createRes!.text()}`);
         }
 
         let prediction = await createRes.json() as any;

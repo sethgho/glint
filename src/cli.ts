@@ -9,6 +9,7 @@ import { bufferToGifBase64, pngToGifBase64, pushToTidbyt } from './push';
 import { getStyle, listStyles, loadEmotionImage, listStyleEmotions, getStyleDir, USER_STYLES_DIR } from './styles';
 import { resolve, loadConfig } from './config';
 import { validateStyleDirectory, REQUIRED_EMOTIONS } from './validate';
+import * as registry from './registry';
 
 const program = new Command();
 
@@ -262,6 +263,193 @@ program
       }
       process.exit(1);
     }
+  });
+
+// --- Auth commands ---
+
+const auth = program.command('auth').description('Manage registry authentication');
+
+auth
+  .command('login')
+  .description('Authenticate with the Glint Community registry via GitHub')
+  .action(async () => {
+    try {
+      const { username } = await registry.login();
+      console.log(`\n✨ Authenticated as ${username}`);
+      console.log(`Token saved to ~/.config/glint/auth.json`);
+    } catch (error: any) {
+      console.error(`Error: ${error.message}`);
+      process.exit(1);
+    }
+  });
+
+auth
+  .command('whoami')
+  .description('Show current authenticated user')
+  .action(async () => {
+    try {
+      const user = await registry.whoami();
+      console.log(`Logged in as: ${user.username}`);
+    } catch (error: any) {
+      console.error(`Error: ${error.message}`);
+      process.exit(1);
+    }
+  });
+
+auth
+  .command('token')
+  .description('Create a new API token for CI/automation')
+  .requiredOption('--name <name>', 'Token name')
+  .action(async (options) => {
+    try {
+      const result = await registry.createToken(options.name);
+      console.log(`\nToken created: ${result.token}`);
+      console.log(`\n⚠️  Save this token — it won't be shown again.`);
+      console.log(`Use with: GLINT_TOKEN=${result.token} glint style publish <name>`);
+    } catch (error: any) {
+      console.error(`Error: ${error.message}`);
+      process.exit(1);
+    }
+  });
+
+auth
+  .command('logout')
+  .description('Remove stored authentication')
+  .action(() => {
+    const { existsSync: ex, unlinkSync } = require('fs');
+    const { join: j } = require('path');
+    const { homedir: hd } = require('os');
+    const authFile = j(hd(), '.config', 'glint', 'auth.json');
+    if (ex(authFile)) {
+      unlinkSync(authFile);
+      console.log('Logged out. Token removed.');
+    } else {
+      console.log('Not logged in.');
+    }
+  });
+
+// --- Style registry commands ---
+
+const style = program.command('style').description('Manage community styles');
+
+style
+  .command('search')
+  .description('Search the community registry')
+  .argument('[query]', 'search query')
+  .option('-a, --author <author>', 'filter by author')
+  .action(async (query, options) => {
+    try {
+      const result = await registry.search(query, options.author);
+      if (result.styles.length === 0) {
+        console.log('No styles found.');
+        return;
+      }
+      console.log(`${result.total} style(s) found:\n`);
+      for (const s of result.styles) {
+        console.log(`  @${s.author}/${s.slug}  v${s.version}  ⬇ ${s.download_count}`);
+        console.log(`    ${s.description}`);
+      }
+    } catch (error: any) {
+      console.error(`Error: ${error.message}`);
+      process.exit(1);
+    }
+  });
+
+style
+  .command('info')
+  .description('Show details about a community style')
+  .argument('<ref>', 'style reference (@author/name)')
+  .action(async (ref) => {
+    try {
+      const match = ref.match(/^@?([^/]+)\/(.+)$/);
+      if (!match) throw new Error('Use format: @author/name');
+      const [, author, slug] = match;
+      const info = await registry.getStyleInfo(author, slug);
+      console.log(`\n  @${info.author}/${info.slug}  v${info.version}`);
+      console.log(`  ${info.description}`);
+      console.log(`  ⬇ ${info.download_count} downloads`);
+      console.log(`  Published: ${info.published_at}`);
+      console.log(`\n  Emotions: ${info.emotions.map((e: any) => e.emotion).join(', ')}`);
+      console.log(`\n  Install: glint style install @${info.author}/${info.slug}`);
+    } catch (error: any) {
+      console.error(`Error: ${error.message}`);
+      process.exit(1);
+    }
+  });
+
+style
+  .command('install')
+  .description('Install a style from the community registry')
+  .argument('<ref>', 'style reference (@author/name)')
+  .action(async (ref) => {
+    try {
+      console.log(`Installing ${ref}...`);
+      const installDir = await registry.install(ref);
+      console.log(`\n✨ Installed to ${installDir}`);
+      console.log(`Use with: glint show happy --style ${ref.replace(/^@?[^/]+\//, '')}`);
+    } catch (error: any) {
+      console.error(`Error: ${error.message}`);
+      process.exit(1);
+    }
+  });
+
+style
+  .command('publish')
+  .description('Publish a user style to the community registry')
+  .argument('<name>', 'style name (from ~/.config/glint/styles/)')
+  .action(async (name) => {
+    try {
+      console.log(`Publishing "${name}"...`);
+      const result = await registry.publish(name);
+      console.log(`\n✨ Published! ${result.url}`);
+      console.log(`Install: ${result.install}`);
+    } catch (error: any) {
+      console.error(`Error: ${error.message}`);
+      process.exit(1);
+    }
+  });
+
+style
+  .command('init')
+  .description('Scaffold a new style package')
+  .argument('<name>', 'style name')
+  .action(async (name) => {
+    const { USER_STYLES_DIR } = await import('./styles');
+    const styleDir = join(USER_STYLES_DIR, name);
+    mkdirSync(styleDir, { recursive: true });
+
+    // Write manifest
+    const manifest = {
+      specVersion: '1.0',
+      name,
+      version: '1.0.0',
+      description: `${name} style for glint`,
+      emotions: [...REQUIRED_EMOTIONS],
+      files: {},
+      tags: [],
+      license: 'MIT',
+    };
+    writeFileSync(join(styleDir, 'glint-style.json'), JSON.stringify(manifest, null, 2));
+
+    // Create placeholder PNGs (1x1 black pixel)
+    const sharp = (await import('sharp')).default;
+    for (const emotion of REQUIRED_EMOTIONS) {
+      await sharp({ create: { width: 64, height: 32, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 255 } } })
+        .png()
+        .toFile(join(styleDir, `${emotion}.png`));
+    }
+
+    console.log(`\n✨ Style scaffolded at ${styleDir}`);
+    console.log(`\nFiles created:`);
+    console.log(`  glint-style.json  (manifest)`);
+    for (const emotion of REQUIRED_EMOTIONS) {
+      console.log(`  ${emotion}.png     (placeholder)`);
+    }
+    console.log(`\nNext steps:`);
+    console.log(`  1. Replace the placeholder PNGs with your designs (64×32)`);
+    console.log(`  2. Edit glint-style.json (description, tags, etc.)`);
+    console.log(`  3. Validate: glint validate ${name}`);
+    console.log(`  4. Publish:  glint style publish ${name}`);
   });
 
 program.parse();

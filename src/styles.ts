@@ -29,6 +29,11 @@ export const STYLES: Record<string, Style> = {
     type: 'image',
     description: 'AI-generated cartoon eyes (flux-schnell)',
   },
+  'anime': {
+    name: 'anime',
+    type: 'image',
+    description: 'Anime-style eyes with sparkles and vibrant colors',
+  },
 };
 
 export function listStyles(): Style[] {

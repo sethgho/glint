@@ -1,9 +1,11 @@
 /**
- * Style system for glint - supports both programmatic and image-based styles
+ * Style system for glint - supports programmatic, SVG, and PNG styles
+ * SVG is now the recommended format (scales infinitely)
  */
 
 import sharp from 'sharp';
-import { existsSync, readdirSync } from 'fs';
+import { Resvg } from '@resvg/resvg-js';
+import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { homedir } from 'os';
@@ -13,12 +15,14 @@ const ASSETS_DIR = join(__dirname, '../assets');
 const USER_STYLES_DIR = join(homedir(), '.config', 'glint', 'styles');
 
 export type StyleType = 'programmatic' | 'image';
+export type ImageFormat = 'svg' | 'png';
 
 export interface Style {
   name: string;
   type: StyleType;
   description: string;
   userStyle?: boolean;
+  format?: ImageFormat; // For image-based styles
 }
 
 export const BUILTIN_STYLES: Record<string, Style> = {
@@ -62,12 +66,24 @@ export function discoverUserStyles(): Record<string, Style> {
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;
       const styleDir = join(USER_STYLES_DIR, entry.name);
-      const pngs = readdirSync(styleDir).filter(f => f.endsWith('.png'));
-      if (pngs.length > 0) {
+      const files = readdirSync(styleDir);
+      const svgs = files.filter(f => f.endsWith('.svg'));
+      const pngs = files.filter(f => f.endsWith('.png'));
+      
+      if (svgs.length > 0) {
         userStyles[entry.name] = {
           name: entry.name,
           type: 'image',
-          description: `User style (${pngs.length} emotions)`,
+          format: 'svg',
+          description: `User style (${svgs.length} SVG emotions)`,
+          userStyle: true,
+        };
+      } else if (pngs.length > 0) {
+        userStyles[entry.name] = {
+          name: entry.name,
+          type: 'image',
+          format: 'png',
+          description: `User style (${pngs.length} PNG emotions)`,
           userStyle: true,
         };
       }
@@ -106,28 +122,56 @@ export function getStyleDir(style: Style): string {
 }
 
 /**
- * Load an emotion image for a given style
- * Returns a 64x32 PNG buffer
+ * Render SVG to PNG buffer at specified dimensions
  */
-export async function loadEmotionImage(styleName: string, emotionName: string): Promise<Buffer> {
+export function renderSVGtoPNG(svgContent: string, width: number, height: number): Buffer {
+  const resvg = new Resvg(svgContent, {
+    fitTo: {
+      mode: 'width',
+      value: width,
+    },
+  });
+  
+  const pngData = resvg.render();
+  return pngData.asPng();
+}
+
+/**
+ * Load an emotion image for a given style
+ * Returns a 64x32 PNG buffer (rasterizes SVG if needed)
+ */
+export async function loadEmotionImage(
+  styleName: string, 
+  emotionName: string,
+  width: number = 64,
+  height: number = 32
+): Promise<Buffer> {
   const style = getStyle(styleName);
 
   if (style.type !== 'image') {
     throw new Error(`Style "${styleName}" is not image-based`);
   }
 
-  const assetPath = join(getStyleDir(style), `${emotionName}.png`);
-
-  if (!existsSync(assetPath)) {
-    throw new Error(`No image found for emotion "${emotionName}" in style "${styleName}"`);
+  const styleDir = getStyleDir(style);
+  
+  // Try SVG first
+  const svgPath = join(styleDir, `${emotionName}.svg`);
+  if (existsSync(svgPath)) {
+    const svgContent = readFileSync(svgPath, 'utf-8');
+    return renderSVGtoPNG(svgContent, width, height);
+  }
+  
+  // Fall back to PNG
+  const pngPath = join(styleDir, `${emotionName}.png`);
+  if (existsSync(pngPath)) {
+    const buffer = await sharp(pngPath)
+      .resize(width, height, { fit: 'fill' })
+      .png()
+      .toBuffer();
+    return buffer;
   }
 
-  const buffer = await sharp(assetPath)
-    .resize(64, 32, { fit: 'fill' })
-    .png()
-    .toBuffer();
-
-  return buffer;
+  throw new Error(`No image found for emotion "${emotionName}" in style "${styleName}"`);
 }
 
 /**
@@ -146,9 +190,18 @@ export function listStyleEmotions(styleName: string): string[] {
     return [];
   }
 
-  return readdirSync(styleDir)
-    .filter(f => f.endsWith('.png'))
-    .map(f => f.replace('.png', ''));
+  const files = readdirSync(styleDir);
+  const emotions = new Set<string>();
+  
+  // Collect both SVG and PNG emotions
+  files
+    .filter(f => f.endsWith('.svg') || f.endsWith('.png'))
+    .forEach(f => {
+      const name = f.replace(/\.(svg|png)$/, '');
+      emotions.add(name);
+    });
+  
+  return Array.from(emotions);
 }
 
 export { USER_STYLES_DIR };

@@ -124,6 +124,9 @@ glint reads defaults from `~/.config/glint/config.json`:
 | `deviceId` | string | Tidbyt device ID |
 | `style` | string | Default visual style |
 | `installationId` | string | Installation ID for Tidbyt |
+| `generate.provider` | string | Default LLM provider (`claude`, `codex`, `opencode`, `api`) |
+| `generate.description` | string | Default style description for AI generation |
+| `generate.aesthetic` | string | Default aesthetic direction for AI generation |
 
 Priority: **CLI flags → config file → environment variables → built-in defaults**
 

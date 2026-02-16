@@ -11,6 +11,8 @@ import { homedir } from 'os';
 export interface GenerateConfig {
   provider?: string;
   model?: string;
+  description?: string;
+  aesthetic?: string;
   promptTemplate?: string;
 }
 
@@ -59,6 +61,24 @@ export function resolve(
   const cfg = loadConfig();
   const fromConfig = cfg[configKey] as string | undefined;
   if (fromConfig) return fromConfig;
+  if (envVar && process.env[envVar]) return process.env[envVar];
+  return fallback;
+}
+
+/**
+ * Resolve a generate-specific config value
+ * Priority: explicit → config.generate[key] → env → fallback
+ */
+export function resolveGenerate(
+  explicit: string | undefined,
+  key: keyof GenerateConfig,
+  envVar?: string,
+  fallback?: string,
+): string | undefined {
+  if (explicit) return explicit;
+  const cfg = loadConfig();
+  const val = cfg.generate?.[key] as string | undefined;
+  if (val) return val;
   if (envVar && process.env[envVar]) return process.env[envVar];
   return fallback;
 }

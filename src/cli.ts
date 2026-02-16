@@ -7,7 +7,7 @@ import { getEmotion, listEmotions } from './emotions';
 import { drawEmotion } from './draw';
 import { bufferToGifBase64, pngToGifBase64, pushToTidbyt } from './push';
 import { getStyle, listStyles, loadEmotionImage, listStyleEmotions, getStyleDir, USER_STYLES_DIR, getAnimationParams } from './styles';
-import { resolve, loadConfig } from './config';
+import { resolve, resolveGenerate, loadConfig } from './config';
 import { validateStyleDirectory, REQUIRED_EMOTIONS } from './validate';
 import * as registry from './registry';
 
@@ -198,18 +198,23 @@ program
       
       mkdirSync(outputDir, { recursive: true });
 
-      // Use preset if available, otherwise build from options
+      // Resolve options from CLI → config → defaults
+      const provider = resolveGenerate(options.provider, 'provider');
+      const description = resolveGenerate(options.description, 'description', undefined, `${styleName} style for glint`);
+      const aesthetic = resolveGenerate(options.aesthetic, 'aesthetic', undefined, `${styleName} themed, creative and expressive`);
+
+      // Use preset if available, otherwise build from resolved options
       const preset = STYLE_PRESETS[styleName];
       const prompt = preset || {
         name: styleName,
-        description: options.description || `${styleName} style for glint`,
-        aesthetic: options.aesthetic || `${styleName} themed, creative and expressive`,
+        description: description!,
+        aesthetic: aesthetic!,
       };
 
       console.log(`Generating SVG style "${styleName}"...`);
       console.log(`Aesthetic: ${prompt.aesthetic}\n`);
 
-      const svgs = await generateSvgStyle(prompt, options.provider);
+      const svgs = await generateSvgStyle(prompt, provider);
 
       // Write SVGs and manifest
       const files: Record<string, string> = {};

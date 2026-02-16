@@ -7,20 +7,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ASSETS_DIR = join(__dirname, '../../assets');
 
 describe('validate', () => {
-  it('validates ai-v1 as valid', async () => {
-    const result = await validateStyleDirectory(join(ASSETS_DIR, 'ai-v1'));
+  it('validates kawaii as valid', async () => {
+    const result = await validateStyleDirectory(join(ASSETS_DIR, 'kawaii'));
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);
   });
 
-  it('validates anime as valid', async () => {
-    const result = await validateStyleDirectory(join(ASSETS_DIR, 'anime'));
-    expect(result.valid).toBe(true);
-    expect(result.errors).toHaveLength(0);
-  });
-
-  it('validates pixel-art as valid', async () => {
-    const result = await validateStyleDirectory(join(ASSETS_DIR, 'pixel-art'));
+  it('validates kawaii-animated as valid', async () => {
+    const result = await validateStyleDirectory(join(ASSETS_DIR, 'kawaii-animated'));
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);
   });

@@ -5,23 +5,27 @@ const ALL_EMOTIONS = ['angry', 'confused', 'excited', 'focused', 'happy', 'neutr
 
 describe('styles', () => {
   describe('BUILTIN_STYLES', () => {
-    it('defines 4 built-in styles', () => {
-      expect(Object.keys(BUILTIN_STYLES)).toHaveLength(4);
+    it('defines 3 built-in styles', () => {
+      expect(Object.keys(BUILTIN_STYLES)).toHaveLength(3);
     });
 
-    it('has default, ai-v1, anime, pixel-art', () => {
+    it('has default, kawaii, kawaii-animated', () => {
       expect(BUILTIN_STYLES['default']).toBeDefined();
-      expect(BUILTIN_STYLES['ai-v1']).toBeDefined();
-      expect(BUILTIN_STYLES['anime']).toBeDefined();
-      expect(BUILTIN_STYLES['pixel-art']).toBeDefined();
+      expect(BUILTIN_STYLES['kawaii']).toBeDefined();
+      expect(BUILTIN_STYLES['kawaii-animated']).toBeDefined();
     });
 
     it('default is programmatic type', () => {
       expect(BUILTIN_STYLES['default'].type).toBe('programmatic');
     });
 
-    it('ai-v1 is image type', () => {
-      expect(BUILTIN_STYLES['ai-v1'].type).toBe('image');
+    it('kawaii is svg type', () => {
+      expect(BUILTIN_STYLES['kawaii'].type).toBe('svg');
+    });
+
+    it('kawaii-animated is svg type and animated', () => {
+      expect(BUILTIN_STYLES['kawaii-animated'].type).toBe('svg');
+      expect(BUILTIN_STYLES['kawaii-animated'].animated).toBe(true);
     });
 
     it('all styles have name and description', () => {
@@ -38,9 +42,9 @@ describe('styles', () => {
 
   describe('getStyle', () => {
     it('returns style by name', () => {
-      const s = getStyle('ai-v1');
-      expect(s.name).toBe('ai-v1');
-      expect(s.type).toBe('image');
+      const s = getStyle('kawaii');
+      expect(s.name).toBe('kawaii');
+      expect(s.type).toBe('svg');
     });
 
     it('throws on unknown style', () => {
@@ -53,35 +57,31 @@ describe('styles', () => {
   });
 
   describe('listStyles', () => {
-    it('returns at least 4 styles (built-in)', () => {
+    it('returns at least 3 styles (built-in)', () => {
       const styles = listStyles();
-      expect(styles.length).toBeGreaterThanOrEqual(4);
+      expect(styles.length).toBeGreaterThanOrEqual(3);
       const names = styles.map(s => s.name);
       expect(names).toContain('default');
-      expect(names).toContain('ai-v1');
+      expect(names).toContain('kawaii');
     });
 
     it('built-in styles do not have userStyle flag', () => {
       const styles = listStyles().filter(s => !s.userStyle);
-      expect(styles.length).toBeGreaterThanOrEqual(4);
+      expect(styles.length).toBeGreaterThanOrEqual(3);
     });
   });
 
   describe('listStyleEmotions', () => {
-    it('returns 10 emotions for ai-v1', () => {
-      const emotions = listStyleEmotions('ai-v1');
+    it('returns 10 emotions for kawaii', () => {
+      const emotions = listStyleEmotions('kawaii');
       expect(emotions).toHaveLength(10);
       for (const e of ALL_EMOTIONS) {
         expect(emotions).toContain(e);
       }
     });
 
-    it('returns 10 emotions for anime', () => {
-      expect(listStyleEmotions('anime')).toHaveLength(10);
-    });
-
-    it('returns 10 emotions for pixel-art', () => {
-      expect(listStyleEmotions('pixel-art')).toHaveLength(10);
+    it('returns 10 emotions for kawaii-animated', () => {
+      expect(listStyleEmotions('kawaii-animated')).toHaveLength(10);
     });
 
     it('returns empty for programmatic style', () => {
@@ -90,39 +90,32 @@ describe('styles', () => {
   });
 
   describe('loadEmotionImage', () => {
-    it('loads ai-v1 happy as a 64x32 PNG buffer', async () => {
-      const buf = await loadEmotionImage('ai-v1', 'happy');
+    it('loads kawaii happy as a buffer', async () => {
+      const buf = await loadEmotionImage('kawaii', 'happy');
       expect(buf).toBeInstanceOf(Buffer);
       expect(buf.length).toBeGreaterThan(0);
     });
 
-    it('loads all ai-v1 emotions', async () => {
+    it('loads all kawaii emotions', async () => {
       for (const emotion of ALL_EMOTIONS) {
-        const buf = await loadEmotionImage('ai-v1', emotion);
+        const buf = await loadEmotionImage('kawaii', emotion);
         expect(buf.length).toBeGreaterThan(0);
       }
     });
 
-    it('loads all anime emotions', async () => {
+    it('loads all kawaii-animated emotions', async () => {
       for (const emotion of ALL_EMOTIONS) {
-        const buf = await loadEmotionImage('anime', emotion);
-        expect(buf.length).toBeGreaterThan(0);
-      }
-    });
-
-    it('loads all pixel-art emotions', async () => {
-      for (const emotion of ALL_EMOTIONS) {
-        const buf = await loadEmotionImage('pixel-art', emotion);
+        const buf = await loadEmotionImage('kawaii-animated', emotion);
         expect(buf.length).toBeGreaterThan(0);
       }
     });
 
     it('throws for non-image style', async () => {
-      expect(loadEmotionImage('default', 'happy')).rejects.toThrow(/not image-based/);
+      expect(loadEmotionImage('default', 'happy')).rejects.toThrow(/not SVG-based/);
     });
 
     it('throws for missing emotion image', async () => {
-      expect(loadEmotionImage('ai-v1', 'nonexistent')).rejects.toThrow(/No image found/);
+      expect(loadEmotionImage('kawaii', 'nonexistent')).rejects.toThrow(/No SVG found/);
     });
   });
 });

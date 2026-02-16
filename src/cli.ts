@@ -173,106 +173,59 @@ program
 
 program
   .command('generate')
-  .description('Generate emotion images using AI')
-  .argument('<style-name>', 'name for the new style')
-  .option('--provider <provider>', 'AI provider (replicate)')
-  .option('--model <model>', 'model to use')
-  .option('--prompt <template>', 'prompt template ({emotion} placeholder)')
+  .description('Generate SVG emotion style using AI (LLM)')
+  .argument('<style-name>', 'name for the new style (or a preset: cyberpunk, retro, spooky, nature, robot)')
+  .option('--description <desc>', 'style description')
+  .option('--aesthetic <aesthetic>', 'aesthetic direction for the AI')
   .action(async (styleName: string, options) => {
     try {
-      const config = loadConfig();
-      const genConfig = (config as any).generate || {};
-
-      const provider = options.provider || genConfig.provider || 'replicate';
-      const model = options.model || genConfig.model || 'black-forest-labs/flux-schnell';
-      const promptTemplate = options.prompt || genConfig.promptTemplate ||
-        'Cartoon expressive {emotion} eyes on pure black background, 64x32 pixel art for LED display, simple and readable';
-
-      if (provider !== 'replicate') {
-        console.error(`Error: Unsupported provider "${provider}". Only "replicate" is supported.`);
-        process.exit(1);
-      }
-
-      const apiToken = process.env.REPLICATE_API_TOKEN;
-      if (!apiToken) {
-        console.error('Error: REPLICATE_API_TOKEN environment variable is required.');
-        process.exit(1);
-      }
-
+      const { generateSvgStyle, STYLE_PRESETS } = await import('./generate-svg');
+      
       const outputDir = join(USER_STYLES_DIR, styleName);
       mkdirSync(outputDir, { recursive: true });
 
-      console.log(`Generating style "${styleName}" with ${model}...`);
-      console.log(`Output: ${outputDir}\n`);
+      // Use preset if available, otherwise build from options
+      const preset = STYLE_PRESETS[styleName];
+      const prompt = preset || {
+        name: styleName,
+        description: options.description || `${styleName} style for glint`,
+        aesthetic: options.aesthetic || `${styleName} themed, creative and expressive`,
+      };
 
-      const sharp = (await import('sharp')).default;
+      console.log(`Generating SVG style "${styleName}"...`);
+      console.log(`Aesthetic: ${prompt.aesthetic}\n`);
 
-      for (const emotion of REQUIRED_EMOTIONS) {
-        const outFile = join(outputDir, `${emotion}.png`);
-        if (existsSync(outFile) && (await import('fs')).statSync(outFile).size > 200) {
-          console.log(`  Skipping ${emotion} (already exists)`);
-          continue;
-        }
-        const prompt = promptTemplate.replace(/\{emotion\}/g, emotion);
-        console.log(`  Generating ${emotion}...`);
+      const svgs = await generateSvgStyle(prompt);
 
-        // Create prediction (use models API for official models)
-        let createRes: Response;
-        for (let attempt = 0; attempt < 5; attempt++) {
-          createRes = await fetch(`https://api.replicate.com/v1/models/${model}/predictions`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${apiToken}`,
-              'Content-Type': 'application/json',
-              'Prefer': 'wait',
-            },
-            body: JSON.stringify({
-              input: { prompt, num_outputs: 1 },
-            }),
-          });
-          if (createRes.status === 429) {
-            const retryAfter = parseInt(createRes.headers.get('retry-after') || '15');
-            console.log(`    Rate limited, waiting ${retryAfter}s...`);
-            await new Promise(r => setTimeout(r, retryAfter * 1000));
-            continue;
-          }
-          break;
-        }
-
-        if (!createRes!.ok) {
-          throw new Error(`Replicate API error: ${createRes!.status} ${await createRes!.text()}`);
-        }
-
-        let prediction = await createRes.json() as any;
-
-        // Poll until complete
-        while (prediction.status !== 'succeeded' && prediction.status !== 'failed') {
-          await new Promise(r => setTimeout(r, 1000));
-          const pollRes = await fetch(prediction.urls.get, {
-            headers: { 'Authorization': `Bearer ${apiToken}` },
-          });
-          prediction = await pollRes.json();
-        }
-
-        if (prediction.status === 'failed') {
-          console.error(`  ✗ Failed to generate ${emotion}: ${prediction.error}`);
-          continue;
-        }
-
-        // Download and process image
-        const imageUrl = Array.isArray(prediction.output) ? prediction.output[0] : prediction.output;
-        const imageRes = await fetch(imageUrl);
-        const imageBuffer = Buffer.from(await imageRes.arrayBuffer());
-
-        await sharp(imageBuffer)
-          .resize(64, 32, { fit: 'cover', position: 'center' })
-          .png()
-          .toFile(join(outputDir, `${emotion}.png`));
-
-        console.log(`  ✓ ${emotion}`);
+      // Write SVGs and manifest
+      const files: Record<string, string> = {};
+      for (const [emotion, svg] of Object.entries(svgs)) {
+        const filePath = join(outputDir, `${emotion}.svg`);
+        const { writeFileSync: wf } = await import('fs');
+        wf(filePath, svg);
+        const { createHash } = await import('crypto');
+        files[`${emotion}.svg`] = createHash('sha256').update(svg).digest('hex');
+        console.log(`  ✓ ${emotion} (${Buffer.byteLength(svg)} bytes)`);
       }
 
-      console.log(`\n✨ Style "${styleName}" generated! Validate with: glint validate ${styleName}`);
+      // Write manifest
+      const manifest = {
+        specVersion: '2.0',
+        name: styleName,
+        version: '1.0.0',
+        description: prompt.description,
+        format: 'svg',
+        emotions: Object.keys(svgs),
+        files,
+        tags: [],
+        license: 'MIT',
+      };
+      const { writeFileSync: wf2 } = await import('fs');
+      wf2(join(outputDir, 'glint-style.json'), JSON.stringify(manifest, null, 2));
+
+      console.log(`\n✨ Style "${styleName}" generated at ${outputDir}`);
+      console.log(`Validate: glint validate ${styleName}`);
+      console.log(`Publish:  glint style publish ${styleName}`);
     } catch (error) {
       if (error instanceof Error) {
         console.error(`Error: ${error.message}`);

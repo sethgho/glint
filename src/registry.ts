@@ -133,9 +133,9 @@ export async function publish(styleName: string): Promise<any> {
     throw new Error(`Style directory not found: ${styleDir}`);
   }
 
-  // Read emotions
-  const pngFiles = readdirSync(styleDir).filter(f => f.endsWith('.png'));
-  const emotions = pngFiles.map(f => f.replace('.png', ''));
+  // Read emotions (SVG files)
+  const svgFiles = readdirSync(styleDir).filter(f => f.endsWith('.svg'));
+  const emotions = svgFiles.map(f => f.replace('.svg', ''));
 
   const REQUIRED = [
     'neutral', 'happy', 'sad', 'angry', 'surprised',
@@ -149,8 +149,8 @@ export async function publish(styleName: string): Promise<any> {
   // Build manifest
   const files: Record<string, string> = {};
   for (const emotion of emotions) {
-    const buf = readFileSync(join(styleDir, `${emotion}.png`));
-    files[`${emotion}.png`] = createHash('sha256').update(buf).digest('hex');
+    const buf = readFileSync(join(styleDir, `${emotion}.svg`));
+    files[`${emotion}.svg`] = createHash('sha256').update(buf).digest('hex');
   }
 
   // Check for glint-style.json or create a default manifest
@@ -176,8 +176,8 @@ export async function publish(styleName: string): Promise<any> {
   form.append('manifest', JSON.stringify(manifest));
 
   for (const emotion of emotions) {
-    const buf = readFileSync(join(styleDir, `${emotion}.png`));
-    form.append(emotion, new Blob([buf], { type: 'image/png' }), `${emotion}.png`);
+    const buf = readFileSync(join(styleDir, `${emotion}.svg`));
+    form.append(emotion, new Blob([buf], { type: 'image/svg+xml' }), `${emotion}.svg`);
   }
 
   // Check for readme
@@ -229,7 +229,8 @@ export async function install(ref: string): Promise<string> {
       throw new Error(`Hash mismatch for ${emotion.emotion}: expected ${emotion.hash}, got ${hash}`);
     }
 
-    writeFileSync(join(installDir, `${emotion.emotion}.png`), buf);
+    const ext = emotion.url?.includes('format=svg') || emotion.url?.endsWith('.svg') ? 'svg' : 'svg';
+    writeFileSync(join(installDir, `${emotion.emotion}.${ext}`), buf);
   }
 
   // Write manifest

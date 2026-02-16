@@ -20,7 +20,7 @@ interface AnimateElement {
  * Check if an SVG contains SMIL animations
  */
 export function isAnimated(svgContent: string): boolean {
-  return /< animate|<animateTransform|<animateMotion|@keyframes/.test(svgContent);
+  return /<animate|<animateTransform|<animateMotion|@keyframes/.test(svgContent);
 }
 
 /**

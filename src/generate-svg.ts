@@ -284,11 +284,14 @@ function detectProvider(preferred?: string): LLMProvider {
     const p = ALL_PROVIDERS.find((p) => p.name === preferred);
     if (!p) throw new Error(`Unknown provider: ${preferred}. Use: claude, codex, opencode, api`);
     if (!p.available()) {
+      const hints: Record<string, string> = {
+        claude: 'Install: npm install -g @anthropic-ai/claude-code',
+        codex: 'Install: npm install -g @openai/codex',
+        opencode: 'Install: go install github.com/sst/opencode@latest',
+        api: 'Set ANTHROPIC_API_KEY environment variable.',
+      };
       throw new Error(
-        `Provider "${preferred}" is not available. ` +
-          (preferred === 'api'
-            ? 'Set ANTHROPIC_API_KEY environment variable.'
-            : `Install the ${preferred} CLI or ensure it's on your PATH.`)
+        `Provider "${preferred}" is not available. ${hints[preferred] || `Ensure ${preferred} is on your PATH.`}`
       );
     }
     return p;

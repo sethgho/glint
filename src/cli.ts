@@ -179,11 +179,23 @@ program
   .option('--description <desc>', 'style description')
   .option('--aesthetic <aesthetic>', 'aesthetic direction for the AI')
   .option('--provider <provider>', 'LLM provider: claude, codex, opencode, api (auto-detected if omitted)')
+  .option('--overwrite', 'overwrite existing style directory')
   .action(async (styleName: string, options) => {
     try {
       const { generateSvgStyle, STYLE_PRESETS } = await import('./generate-svg');
       
       const outputDir = join(USER_STYLES_DIR, styleName);
+      
+      // Check for existing style
+      if (existsSync(outputDir) && !options.overwrite) {
+        const manifest = join(outputDir, 'glint-style.json');
+        if (existsSync(manifest)) {
+          console.error(`Error: Style "${styleName}" already exists at ${outputDir}`);
+          console.error('Use --overwrite to replace it, or choose a different name.');
+          process.exit(1);
+        }
+      }
+      
       mkdirSync(outputDir, { recursive: true });
 
       // Use preset if available, otherwise build from options

@@ -96,6 +96,10 @@ glint list                    List available emotions
 glint styles                  List available visual styles
 glint validate <style>        Validate a style's SVG files
 glint generate <style-name>   Generate SVG emotions using AI (LLM)
+  --description <desc>        Style description for the AI
+  --aesthetic <aesthetic>      Aesthetic direction (e.g. "neon cyberpunk")
+  --provider <provider>       LLM backend: claude, codex, opencode, api
+  --overwrite                 Overwrite existing style directory
 ```
 
 ### Community Registry
@@ -225,15 +229,24 @@ Create SVG-based emotion packs in `~/.config/glint/styles/<style-name>/`. Each s
 # Scaffold a new style
 glint style init my-style
 
-# Generate using AI (requires ANTHROPIC_API_KEY)
+# Generate using AI
 glint generate my-style --aesthetic "watercolor soft pastels"
 
-# Or use a preset
+# Choose your LLM provider (auto-detected if omitted)
+glint generate my-style --aesthetic "pixel art" --provider claude    # Claude Code CLI
+glint generate my-style --aesthetic "pixel art" --provider codex     # OpenAI Codex CLI
+glint generate my-style --aesthetic "pixel art" --provider opencode  # OpenCode CLI
+glint generate my-style --aesthetic "pixel art" --provider api       # Direct Anthropic API (needs ANTHROPIC_API_KEY)
+
+# Or use a preset (no --aesthetic needed)
 glint generate cyberpunk   # neon glow
 glint generate retro       # green phosphor
 glint generate spooky      # halloween
 glint generate nature      # earthy tones
 glint generate robot       # mechanical LED
+
+# Overwrite an existing style
+glint generate my-style --aesthetic "new look" --overwrite
 
 # Validate
 glint validate my-style

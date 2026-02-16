@@ -134,7 +134,15 @@ Ten distinct states, each designed to be instantly readable on a 64×32 LED matr
 
 ## Styles
 
-### `ai-v1` — AI-Generated Cartoon Eyes *(default)*
+### Format Support
+
+Glint now supports **SVG-first styles** in addition to PNG. SVGs scale infinitely — the same file works on Tidbyt (64×32), TRMNL (800×480), desktop widgets, and beyond. Legacy PNG styles (64×32) are still fully supported.
+
+### `kawaii` — Kawaii SVG Eyes ✨ *(SVG, scalable)*
+
+Big sparkly anime-inspired eyes with vibrant colors and kawaii charm. **SVG format** — scales infinitely to any display size.
+
+### `ai-v1` — AI-Generated Cartoon Eyes *(PNG, default)*
 
 Soft, expressive cartoon eyes generated with Flux. The most readable style at Tidbyt's native resolution.
 

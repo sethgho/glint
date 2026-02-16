@@ -1,9 +1,7 @@
 /**
- * Validation for glint style directories
- * Supports both SVG (recommended) and PNG (legacy) formats
+ * Validation for glint style directories (SVG only)
  */
 
-import sharp from 'sharp';
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -12,8 +10,6 @@ export const REQUIRED_EMOTIONS = [
   'worried', 'sleepy', 'excited', 'confused', 'focused',
 ] as const;
 
-export const EXPECTED_WIDTH = 64;
-export const EXPECTED_HEIGHT = 32;
 export const MAX_SVG_SIZE = 100 * 1024; // 100KB
 
 export interface ValidationResult {
@@ -52,7 +48,7 @@ function validateSVG(filePath: string): { valid: boolean; error?: string } {
 }
 
 /**
- * Validate a style directory containing emotion SVGs or PNGs
+ * Validate a style directory containing emotion SVGs
  */
 export async function validateStyleDirectory(dirPath: string): Promise<ValidationResult> {
   const errors: string[] = [];
@@ -64,23 +60,12 @@ export async function validateStyleDirectory(dirPath: string): Promise<Validatio
 
   const allFiles = readdirSync(dirPath);
   const svgFiles = allFiles.filter(f => f.endsWith('.svg'));
-  const pngFiles = allFiles.filter(f => f.endsWith('.png'));
   
-  // Determine format
-  const hasSVG = svgFiles.length > 0;
-  const hasPNG = pngFiles.length > 0;
-  
-  if (!hasSVG && !hasPNG) {
-    return { valid: false, errors: ['No SVG or PNG files found'], warnings };
+  if (svgFiles.length === 0) {
+    return { valid: false, errors: ['No SVG files found (glint is SVG-only)'], warnings };
   }
   
-  if (hasSVG && hasPNG) {
-    warnings.push('Both SVG and PNG files found - SVG will take precedence');
-  }
-  
-  const files = hasSVG ? svgFiles : pngFiles;
-  const format = hasSVG ? 'svg' : 'png';
-  const emotionNames = files.map(f => f.replace(/\.(svg|png)$/, ''));
+  const emotionNames = svgFiles.map(f => f.replace('.svg', ''));
 
   // Check for required emotions
   const missing = REQUIRED_EMOTIONS.filter(e => !emotionNames.includes(e));
@@ -88,40 +73,17 @@ export async function validateStyleDirectory(dirPath: string): Promise<Validatio
     errors.push(`Missing emotions: ${missing.join(', ')}`);
   }
 
-  // Format-specific validation
-  if (format === 'svg') {
-    // Validate SVG files
-    for (const file of svgFiles) {
-      const filePath = join(dirPath, file);
-      const result = validateSVG(filePath);
-      if (!result.valid) {
-        errors.push(`${file}: ${result.error}`);
-      }
-    }
-  } else {
-    // Validate PNG dimensions
-    const dimensionErrors: string[] = [];
-    for (const file of pngFiles) {
-      const filePath = join(dirPath, file);
-      try {
-        const metadata = await sharp(filePath).metadata();
-        if (metadata.width !== EXPECTED_WIDTH || metadata.height !== EXPECTED_HEIGHT) {
-          dimensionErrors.push(
-            `${file} is ${metadata.width}x${metadata.height}, expected ${EXPECTED_WIDTH}x${EXPECTED_HEIGHT}`
-          );
-        }
-      } catch (e) {
-        errors.push(`Could not read ${file}: ${e instanceof Error ? e.message : String(e)}`);
-      }
-    }
-    
-    if (dimensionErrors.length > 0) {
-      errors.push(`Wrong dimensions: ${dimensionErrors.join('; ')}`);
+  // Validate SVG files
+  for (const file of svgFiles) {
+    const filePath = join(dirPath, file);
+    const result = validateSVG(filePath);
+    if (!result.valid) {
+      errors.push(`${file}: ${result.error}`);
     }
   }
 
   // Check for unexpected files
-  const expectedExtensions = ['.svg', '.png', '.json', '.md', '.gif'];
+  const expectedExtensions = ['.svg', '.json', '.md', '.gif'];
   const unexpected = allFiles.filter(f => 
     !f.startsWith('.') && 
     !expectedExtensions.some(ext => f.endsWith(ext))

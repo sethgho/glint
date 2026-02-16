@@ -35,7 +35,7 @@ program
 
       let imageBase64: string;
 
-      if (style.type === 'image') {
+      if (style.type === 'svg') {
         const pngBuffer = await loadEmotionImage(style.name, emotionName);
         imageBase64 = await pngToGifBase64(pngBuffer, emotionName);
       } else {
@@ -88,7 +88,7 @@ program
       const style = getStyle(options.style);
       console.log(`Emotions for style "${style.name}":`);
       
-      if (style.type === 'image') {
+      if (style.type === 'svg') {
         listStyleEmotions(style.name).forEach((name) => {
           console.log(`  - ${name}`);
         });
@@ -121,12 +121,13 @@ program
   .action(() => {
     console.log('Available styles:');
     listStyles().forEach((style) => {
-      const emotions = style.type === 'image' 
+      const emotions = style.type === 'svg' 
         ? listStyleEmotions(style.name) 
         : listEmotions();
       const tag = style.userStyle ? ' (user)' : '';
+      const typeLabel = style.type === 'svg' ? 'SVG (scalable)' : 'Programmatic';
       console.log(`\n  ${style.name}${tag}`);
-      console.log(`    Type: ${style.type}`);
+      console.log(`    Type: ${typeLabel}`);
       console.log(`    Description: ${style.description}`);
       console.log(`    Emotions: ${emotions.join(', ')}`);
     });
@@ -147,7 +148,7 @@ program
 
       if (result.errors.length === 0) {
         console.log(`✓ Found ${REQUIRED_EMOTIONS.length}/${REQUIRED_EMOTIONS.length} required emotions`);
-        console.log('✓ All images are 64x32');
+        console.log('✓ All SVGs are valid (viewBox present, reasonable size)');
         console.log(`✓ Style "${styleName}" is valid!`);
       } else {
         for (const err of result.errors) {

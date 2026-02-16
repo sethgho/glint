@@ -134,17 +134,11 @@ Ten distinct states, each designed to be instantly readable on a 64×32 LED matr
 
 ## Styles
 
-### Format Support
+All glint styles are **SVG-based** — they scale infinitely from Tidbyt (64×32) to TRMNL (800×480) and beyond. The same file works everywhere.
 
-Glint now supports **SVG-first styles** in addition to PNG. SVGs scale infinitely — the same file works on Tidbyt (64×32), TRMNL (800×480), desktop widgets, and beyond. Legacy PNG styles (64×32) are still fully supported.
+### `kawaii` — Kawaii Eyes ✨ *(default)*
 
-### `kawaii` — Kawaii SVG Eyes ✨ *(SVG, scalable)*
-
-Big sparkly anime-inspired eyes with vibrant colors and kawaii charm. **SVG format** — scales infinitely to any display size.
-
-### `ai-v1` — AI-Generated Cartoon Eyes *(PNG, default)*
-
-Soft, expressive cartoon eyes generated with Flux. The most readable style at Tidbyt's native resolution.
+Big sparkly anime-inspired eyes with vibrant colors and kawaii charm. Includes blush, sparkles, and expressive details.
 
 | | | | | |
 |:---:|:---:|:---:|:---:|:---:|
@@ -187,9 +181,14 @@ glint style publish my-style
 
 ### Custom User Styles
 
-You can create your own styles by placing emotion PNGs in `~/.config/glint/styles/<style-name>/`. Each directory needs 10 PNG files (one per emotion, 64×32 pixels): `neutral.png`, `happy.png`, `sad.png`, `angry.png`, `surprised.png`, `worried.png`, `sleepy.png`, `excited.png`, `confused.png`, `focused.png`.
+Create your own styles by placing emotion SVGs in `~/.config/glint/styles/<style-name>/`. Each directory needs 10 SVG files (one per emotion): `neutral.svg`, `happy.svg`, `sad.svg`, `angry.svg`, `surprised.svg`, `worried.svg`, `sleepy.svg`, `excited.svg`, `confused.svg`, `focused.svg`.
 
-User styles appear automatically in `glint styles` with a "(user)" indicator and can be referenced by name just like built-in styles.
+**SVG Requirements:**
+- Must include `viewBox` attribute (e.g., `viewBox="0 0 64 32"`)
+- Max file size: 100KB (typical SVGs are 1-2KB)
+- 2:1 aspect ratio recommended (e.g., 64×32, 128×64)
+
+User styles appear automatically in `glint styles` with a "(user)" indicator.
 
 ```bash
 # Validate your style

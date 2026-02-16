@@ -6,7 +6,7 @@ import { join } from 'path';
 import { getEmotion, listEmotions } from './emotions';
 import { drawEmotion } from './draw';
 import { bufferToGifBase64, pngToGifBase64, pushToTidbyt } from './push';
-import { getStyle, listStyles, loadEmotionImage, listStyleEmotions, getStyleDir, USER_STYLES_DIR } from './styles';
+import { getStyle, listStyles, loadEmotionImage, listStyleEmotions, getStyleDir, USER_STYLES_DIR, getAnimationParams } from './styles';
 import { resolve, loadConfig } from './config';
 import { validateStyleDirectory, REQUIRED_EMOTIONS } from './validate';
 import * as registry from './registry';
@@ -36,8 +36,9 @@ program
       let imageBase64: string;
 
       if (style.type === 'svg') {
-        const pngBuffer = await loadEmotionImage(style.name, emotionName);
-        imageBase64 = await pngToGifBase64(pngBuffer);
+        const pngBuffers = await loadEmotionImage(style.name, emotionName);
+        const { fps } = getAnimationParams(style.name);
+        imageBase64 = await pngToGifBase64(pngBuffers, undefined, fps);
       } else {
         const emotion = getEmotion(emotionName);
         const canvas = drawEmotion(emotion);

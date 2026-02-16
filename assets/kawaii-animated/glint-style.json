@@ -1,0 +1,23 @@
+{
+  "name": "kawaii-animated",
+  "displayName": "Kawaii Animated",
+  "description": "Big sparkly kawaii eyes with SMIL animations - eyes blink, pupils drift, sparkles twinkle",
+  "author": "Loial",
+  "version": "1.0.0",
+  "animated": true,
+  "fps": 15,
+  "duration": 3.0,
+  "emotions": [
+    "neutral",
+    "happy",
+    "sad",
+    "angry",
+    "surprised",
+    "worried",
+    "sleepy",
+    "excited",
+    "confused",
+    "focused"
+  ],
+  "tags": ["kawaii", "animated", "sparkles", "cute", "expressive"]
+}

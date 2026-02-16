@@ -16,47 +16,59 @@ export function bufferToGifBase64(buffer: Buffer): string {
 }
 
 /**
- * Convert PNG buffer to GIF base64 for Tidbyt
+ * Convert PNG buffer(s) to GIF base64 for Tidbyt
+ * Supports both single-frame and multi-frame animated GIFs
  */
-export async function pngToGifBase64(pngBuffer: Buffer, label?: string): Promise<string> {
-  let image = sharp(pngBuffer);
-  
-  // Add crisp pixel text label if provided
-  if (label) {
-    const { renderPixelText, getTextWidth, CHAR_HEIGHT } = await import('./pixelfont');
-    const { buffer: textBuffer, width: textWidth, height: textHeight } = renderPixelText(label);
-    
-    // Center text horizontally, place at bottom
-    const textX = Math.floor((WIDTH - textWidth) / 2);
-    const textY = HEIGHT - CHAR_HEIGHT - 1;
-    
-    image = image.composite([{
-      input: textBuffer,
-      raw: {
-        width: textWidth,
-        height: textHeight,
-        channels: 4,
-      },
-      top: textY,
-      left: textX,
-    }]);
-  }
-  
-  // Extract raw RGBA pixels from PNG
-  const { data, info } = await image
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  
-  if (info.width !== WIDTH || info.height !== HEIGHT) {
-    throw new Error(`Image must be ${WIDTH}x${HEIGHT}, got ${info.width}x${info.height}`);
-  }
+export async function pngToGifBase64(
+  pngBuffers: Buffer | Buffer[], 
+  label?: string,
+  fps: number = 15
+): Promise<string> {
+  const bufferArray = Array.isArray(pngBuffers) ? pngBuffers : [pngBuffers];
+  const delay = Math.round(1000 / fps); // Convert fps to milliseconds per frame
   
   const encoder = new GIFEncoder(WIDTH, HEIGHT);
-  encoder.setDelay(75);
-  encoder.setRepeat(0);
+  encoder.setDelay(delay);
+  encoder.setRepeat(0); // 0 = loop forever
   encoder.start();
-  encoder.addFrame(data);
+  
+  for (let i = 0; i < bufferArray.length; i++) {
+    let image = sharp(bufferArray[i]);
+    
+    // Add label to first frame only
+    if (label && i === 0) {
+      const { renderPixelText, CHAR_HEIGHT } = await import('./pixelfont');
+      const { buffer: textBuffer, width: textWidth, height: textHeight } = renderPixelText(label);
+      
+      // Center text horizontally, place at bottom
+      const textX = Math.floor((WIDTH - textWidth) / 2);
+      const textY = HEIGHT - CHAR_HEIGHT - 1;
+      
+      image = image.composite([{
+        input: textBuffer,
+        raw: {
+          width: textWidth,
+          height: textHeight,
+          channels: 4,
+        },
+        top: textY,
+        left: textX,
+      }]);
+    }
+    
+    // Extract raw RGBA pixels from PNG
+    const { data, info } = await image
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    
+    if (info.width !== WIDTH || info.height !== HEIGHT) {
+      throw new Error(`Frame ${i}: Image must be ${WIDTH}x${HEIGHT}, got ${info.width}x${info.height}`);
+    }
+    
+    encoder.addFrame(data);
+  }
+  
   encoder.finish();
   return encoder.out.getData().toString('base64');
 }

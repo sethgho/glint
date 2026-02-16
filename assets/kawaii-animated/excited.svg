@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 32" width="64" height="32">
+  <rect width="64" height="32" fill="#1a1a2e" rx="2"/>
+  
+  <!-- Left eye - bouncy -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0,0;0,-1;0,1;0,0" dur="0.6s" repeatCount="indefinite"/>
+    <ellipse cx="20" cy="13" rx="8" ry="9" fill="#fff"/>
+    <ellipse cx="20" cy="14" rx="6.5" ry="7.5" fill="#ff1493"/>
+    <ellipse cx="20" cy="15" rx="5" ry="6" fill="#ff69b4"/>
+    <circle cx="20" cy="14" r="4" fill="#111"/>
+    <circle cx="17" cy="11" r="2" fill="#fff"/>
+    <circle cx="23" cy="13" r="1" fill="#fff" opacity="0.8"/>
+  </g>
+  
+  <!-- Right eye - bouncy -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0,0;0,-1;0,1;0,0" dur="0.6s" begin="0.15s" repeatCount="indefinite"/>
+    <ellipse cx="44" cy="13" rx="8" ry="9" fill="#fff"/>
+    <ellipse cx="44" cy="14" rx="6.5" ry="7.5" fill="#ff1493"/>
+    <ellipse cx="44" cy="15" rx="5" ry="6" fill="#ff69b4"/>
+    <circle cx="44" cy="14" r="4" fill="#111"/>
+    <circle cx="41" cy="11" r="2" fill="#fff"/>
+    <circle cx="47" cy="13" r="1" fill="#fff" opacity="0.8"/>
+  </g>
+  
+  <!-- Rotating sparkles around left eye -->
+  <g>
+    <animateTransform attributeName="transform" type="rotate" values="0 20 13;360 20 13" dur="2s" repeatCount="indefinite"/>
+    <circle cx="12" cy="13" r="1.5" fill="#ffff00" opacity="0.9"/>
+    <circle cx="28" cy="13" r="1.5" fill="#ffff00" opacity="0.9"/>
+    <circle cx="20" cy="5" r="1.5" fill="#ffff00" opacity="0.9"/>
+    <circle cx="20" cy="21" r="1.5" fill="#ffff00" opacity="0.9"/>
+  </g>
+  
+  <!-- Rotating sparkles around right eye -->
+  <g>
+    <animateTransform attributeName="transform" type="rotate" values="0 44 13;-360 44 13" dur="2s" repeatCount="indefinite"/>
+    <circle cx="36" cy="13" r="1.5" fill="#ffff00" opacity="0.9"/>
+    <circle cx="52" cy="13" r="1.5" fill="#ffff00" opacity="0.9"/>
+    <circle cx="44" cy="5" r="1.5" fill="#ffff00" opacity="0.9"/>
+    <circle cx="44" cy="21" r="1.5" fill="#ffff00" opacity="0.9"/>
+  </g>
+  
+  <!-- Excited eyebrows -->
+  <path d="M14 6 Q18 4 22 6" stroke="#ff69b4" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M42 6 Q46 4 50 6" stroke="#ff69b4" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  
+  <!-- Big smile -->
+  <path d="M24 24 Q32 28 40 24" stroke="#ff69b4" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+</svg>

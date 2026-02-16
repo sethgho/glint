@@ -15,11 +15,26 @@ const USER_STYLES_DIR = join(homedir(), '.config', 'glint', 'styles');
 
 export type StyleType = 'programmatic' | 'svg';
 
+export interface StyleMetadata {
+  name: string;
+  displayName?: string;
+  description?: string;
+  author?: string;
+  version?: string;
+  animated?: boolean;
+  fps?: number;
+  duration?: number;
+  emotions?: string[];
+  tags?: string[];
+}
+
 export interface Style {
   name: string;
   type: StyleType;
   description: string;
   userStyle?: boolean;
+  animated?: boolean;
+  metadata?: StyleMetadata;
 }
 
 export const BUILTIN_STYLES: Record<string, Style> = {
@@ -32,6 +47,12 @@ export const BUILTIN_STYLES: Record<string, Style> = {
     name: 'kawaii',
     type: 'svg',
     description: 'Big sparkly kawaii eyes with vibrant colors',
+  },
+  'kawaii-animated': {
+    name: 'kawaii-animated',
+    type: 'svg',
+    description: 'Animated kawaii eyes with blinking, sparkling, and emotional movements',
+    animated: true,
   },
 };
 
@@ -99,6 +120,40 @@ export function getStyleDir(style: Style): string {
 }
 
 /**
+ * Load style metadata from glint-style.json if it exists
+ */
+export function loadStyleMetadata(style: Style): StyleMetadata | null {
+  if (style.metadata) return style.metadata;
+  
+  const styleDir = getStyleDir(style);
+  const metadataPath = join(styleDir, 'glint-style.json');
+  
+  if (!existsSync(metadataPath)) {
+    return null;
+  }
+  
+  try {
+    const content = readFileSync(metadataPath, 'utf-8');
+    return JSON.parse(content) as StyleMetadata;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Get animation parameters for a style
+ */
+export function getAnimationParams(styleName: string): { fps: number; duration: number } {
+  const style = getStyle(styleName);
+  const metadata = loadStyleMetadata(style);
+  
+  return {
+    fps: metadata?.fps || 15,
+    duration: metadata?.duration || 3.0,
+  };
+}
+
+/**
  * Render SVG to PNG buffer at specified dimensions
  */
 export function renderSVGtoPNG(svgContent: string, width: number, height: number): Buffer {
@@ -114,15 +169,15 @@ export function renderSVGtoPNG(svgContent: string, width: number, height: number
 }
 
 /**
- * Load an emotion SVG and rasterize to PNG
- * Returns a PNG buffer at specified dimensions (default 64x32 for Tidbyt)
+ * Load an emotion SVG and rasterize to PNG (or multiple frames if animated)
+ * Returns a PNG buffer or array of PNG buffers for animated styles
  */
 export async function loadEmotionImage(
   styleName: string, 
   emotionName: string,
   width: number = 64,
   height: number = 32
-): Promise<Buffer> {
+): Promise<Buffer | Buffer[]> {
   const style = getStyle(styleName);
 
   if (style.type !== 'svg') {
@@ -137,6 +192,15 @@ export async function loadEmotionImage(
   }
   
   const svgContent = readFileSync(svgPath, 'utf-8');
+  
+  // Check if animated
+  const { isAnimated, renderAnimatedFrames } = await import('./animate');
+  
+  if (style.animated && isAnimated(svgContent)) {
+    const { fps, duration } = getAnimationParams(styleName);
+    return renderAnimatedFrames(svgContent, fps, duration, width, height);
+  }
+  
   return renderSVGtoPNG(svgContent, width, height);
 }
 

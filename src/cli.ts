@@ -37,7 +37,7 @@ program
 
       if (style.type === 'svg') {
         const pngBuffer = await loadEmotionImage(style.name, emotionName);
-        imageBase64 = await pngToGifBase64(pngBuffer, emotionName);
+        imageBase64 = await pngToGifBase64(pngBuffer);
       } else {
         const emotion = getEmotion(emotionName);
         const canvas = drawEmotion(emotion);

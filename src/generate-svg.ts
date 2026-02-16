@@ -11,8 +11,8 @@
  * Auto-detects installed CLIs; falls back to API.
  */
 
-import { execSync } from 'child_process';
-import { writeFileSync } from 'fs';
+import { execSync, spawn } from 'child_process';
+import { writeFileSync, mkdtempSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { REQUIRED_EMOTIONS } from './validate';
@@ -50,6 +50,7 @@ RULES:
 - Use the aesthetic style described
 - Each emotion must be visually distinct and recognizable even at tiny sizes
 - No text elements except small symbols (like "z" for sleepy or "?" for confused)
+- IMPORTANT: Keep ALL elements within a safe zone — no element should extend above y=3 or below y=29. This prevents clipping on small displays.
 
 Output format: Return a JSON object where keys are emotion names and values are complete SVG strings.
 Example: {"happy": "<svg ...>...</svg>", "sad": "<svg ...>...</svg>"}`;
@@ -90,12 +91,89 @@ function whichSync(bin: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// Utility: spawn a CLI process with progress dots and proper timeout
+// ---------------------------------------------------------------------------
+
+function spawnWithProgress(
+  cmd: string,
+  args: string[],
+  opts: { timeoutMs?: number; label?: string; pty?: boolean } = {}
+): Promise<string> {
+  const { timeoutMs = 300_000, label = cmd, pty = false } = opts;
+
+  return new Promise((resolve, reject) => {
+    // Some CLIs (claude) require a TTY. Use `script` to fake one.
+    let spawnCmd = cmd;
+    let spawnArgs = args;
+    if (pty) {
+      // `script -qc` runs a command in a PTY, outputs to /dev/null for the typescript
+      const fullCmd = [cmd, ...args].map(a => `'${a.replace(/'/g, "'\\''")}'`).join(' ');
+      spawnCmd = 'script';
+      spawnArgs = ['-qc', fullCmd, '/dev/null'];
+    }
+
+    const proc = spawn(spawnCmd, spawnArgs, {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: { ...process.env },
+    });
+
+    let stdout = '';
+    let stderr = '';
+    let dots = 0;
+
+    // Spinner frames for visual feedback
+    const spinChars = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+    const progress = setInterval(() => {
+      dots++;
+      const spin = spinChars[dots % spinChars.length];
+      process.stderr.write(`\r  ${spin} [${label}] generating... ${dots}s`);
+    }, 1000);
+
+    const timer = setTimeout(() => {
+      clearInterval(progress);
+      proc.kill('SIGKILL');
+      reject(new Error(`${label} timed out after ${timeoutMs / 1000}s`));
+    }, timeoutMs);
+
+    proc.stdout.on('data', (chunk: Buffer) => { stdout += chunk.toString(); });
+    proc.stderr.on('data', (chunk: Buffer) => { stderr += chunk.toString(); });
+
+    proc.on('close', (code) => {
+      clearInterval(progress);
+      clearTimeout(timer);
+      process.stderr.write('\n');
+
+      if (code !== 0) {
+        reject(new Error(`${label} exited with code ${code}: ${stderr.slice(0, 500)}`));
+      } else {
+        resolve(stdout);
+      }
+    });
+
+    proc.on('error', (err) => {
+      clearInterval(progress);
+      clearTimeout(timer);
+      reject(err);
+    });
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Utility: extract JSON from LLM text (handles code fences)
 // ---------------------------------------------------------------------------
 
+function stripAnsi(s: string): string {
+  // eslint-disable-next-line no-control-regex
+  return s.replace(/\x1b\[[0-9;]*[a-zA-Z]|\x1b\][^\x07]*\x07|\x1b\[[\?]?[0-9;]*[a-zA-Z]/g, '');
+}
+
 function extractJson(text: string): string {
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-  return fenced ? fenced[1].trim() : text.trim();
+  const clean = stripAnsi(text);
+  const fenced = clean.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenced) return fenced[1].trim();
+  // Try to find a JSON object directly
+  const jsonMatch = clean.match(/(\{[\s\S]*\})/);
+  return jsonMatch ? jsonMatch[1].trim() : clean.trim();
 }
 
 // ---------------------------------------------------------------------------
@@ -106,24 +184,15 @@ const claudeProvider: LLMProvider = {
   name: 'claude',
   available: () => whichSync('claude'),
   async generate(system, user) {
-    // Write schema to temp file for --json-schema
-    const schemaPath = join(tmpdir(), `glint-schema-${Date.now()}.json`);
-    writeFileSync(schemaPath, JSON.stringify(SVG_SCHEMA));
-
     const combinedPrompt = `${system}\n\n${user}`;
-    // claude -p outputs to stdout; --output-format json --json-schema gives structured_output
-    const result = execSync(
-      `claude -p ${shellEscape(combinedPrompt)} --output-format json --json-schema ${shellEscape(schemaPath)}`,
-      { encoding: 'utf-8', maxBuffer: 1024 * 1024, timeout: 120_000 }
-    );
+    console.log('  Calling claude -p (this may take 1-3 minutes)...');
 
-    // Response is JSON with a structured_output field
-    const parsed = JSON.parse(result);
-    if (parsed.structured_output) {
-      return JSON.stringify(parsed.structured_output);
-    }
-    // Fallback: result field contains text
-    return parsed.result || result;
+    const result = await spawnWithProgress('claude', [
+      '-p', combinedPrompt,
+      '--output-format', 'text',
+    ], { label: 'claude', timeoutMs: 600_000, pty: true });
+
+    return stripAnsi(result);
   },
 };
 
@@ -135,14 +204,16 @@ const codexProvider: LLMProvider = {
   name: 'codex',
   available: () => whichSync('codex'),
   async generate(system, user) {
-    const schemaPath = join(tmpdir(), `glint-schema-${Date.now()}.json`);
+    const schemaPath = join(mkdtempSync(join(tmpdir(), 'glint-')), 'schema.json');
     writeFileSync(schemaPath, JSON.stringify(SVG_SCHEMA));
 
     const combinedPrompt = `${system}\n\n${user}`;
-    const result = execSync(
-      `codex exec ${shellEscape(combinedPrompt)} --output-schema ${shellEscape(schemaPath)}`,
-      { encoding: 'utf-8', maxBuffer: 1024 * 1024, timeout: 120_000 }
-    );
+    console.log('  Calling codex exec (this may take 1-3 minutes)...');
+
+    const result = await spawnWithProgress('codex', [
+      'exec', combinedPrompt,
+      '--output-schema', schemaPath,
+    ], { label: 'codex', timeoutMs: 600_000 });
 
     return result;
   },
@@ -157,10 +228,11 @@ const opencodeProvider: LLMProvider = {
   available: () => whichSync('opencode'),
   async generate(system, user) {
     const combinedPrompt = `${system}\n\n${user}`;
-    const result = execSync(
-      `opencode run ${shellEscape(combinedPrompt)}`,
-      { encoding: 'utf-8', maxBuffer: 1024 * 1024, timeout: 120_000 }
-    );
+    console.log('  Calling opencode run (this may take 1-3 minutes)...');
+
+    const result = await spawnWithProgress('opencode', [
+      'run', combinedPrompt,
+    ], { label: 'opencode', timeoutMs: 600_000 });
 
     return result;
   },
@@ -232,15 +304,6 @@ function detectProvider(preferred?: string): LLMProvider {
       'Install one of: claude (Claude Code), codex (OpenAI Codex), opencode (OpenCode)\n' +
       'Or set ANTHROPIC_API_KEY for direct API access.'
   );
-}
-
-// ---------------------------------------------------------------------------
-// Shell escape helper
-// ---------------------------------------------------------------------------
-
-function shellEscape(s: string): string {
-  // Use single quotes, escaping any embedded single quotes
-  return "'" + s.replace(/'/g, "'\\''") + "'";
 }
 
 // ---------------------------------------------------------------------------

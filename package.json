@@ -1,15 +1,30 @@
 {
-  "name": "glint",
+  "name": "@sethgho/glint",
   "version": "0.3.0",
   "description": "Express emotional status on IoT displays via eyes & eyebrows",
   "type": "module",
-  "private": true,
   "bin": {
     "glint": "./dist/cli.js"
   },
+  "files": [
+    "dist/",
+    "assets/",
+    "scripts/patch-deps.sh",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sethgho/glint.git"
+  },
+  "homepage": "https://github.com/sethgho/glint",
+  "keywords": ["tidbyt", "display", "emotions", "eyes", "iot", "ai-agent", "status"],
+  "author": "Seth Gholson",
+  "license": "MIT",
   "scripts": {
     "postinstall": "bash scripts/patch-deps.sh",
-    "build": "bun build src/cli.ts --outdir dist --target node",
+    "build": "bun build src/cli.ts --outdir dist --target node --external @resvg/resvg-js",
     "build:binary": "bun build src/cli.ts --compile --outfile glint",
     "build:binary:all": "bash scripts/build-all.sh",
     "dev": "bun run src/cli.ts",

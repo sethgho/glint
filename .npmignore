@@ -1,0 +1,10 @@
+src/
+*.ts
+.github/
+scripts/build-all.sh
+glint-test
+dist/binaries/
+node_modules/
+bun.lock
+tsconfig.json
+.gitignore

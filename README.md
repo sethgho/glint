@@ -34,6 +34,43 @@ It's simple, it's delightful, and it makes your agent feel *real*.
 
 ## Installation
 
+### Standalone binary (recommended)
+
+Download the latest binary for your platform from [GitHub Releases](https://github.com/sethgho/glint/releases):
+
+```bash
+# macOS (Apple Silicon)
+curl -L https://github.com/sethgho/glint/releases/latest/download/glint-darwin-arm64.tar.gz | tar xz
+sudo mv glint-darwin-arm64 /usr/local/bin/glint
+
+# macOS (Intel)
+curl -L https://github.com/sethgho/glint/releases/latest/download/glint-darwin-x64.tar.gz | tar xz
+sudo mv glint-darwin-x64 /usr/local/bin/glint
+
+# Linux (x64)
+curl -L https://github.com/sethgho/glint/releases/latest/download/glint-linux-x64.tar.gz | tar xz
+sudo mv glint-linux-x64 /usr/local/bin/glint
+
+# Linux (ARM64)
+curl -L https://github.com/sethgho/glint/releases/latest/download/glint-linux-arm64.tar.gz | tar xz
+sudo mv glint-linux-arm64 /usr/local/bin/glint
+```
+
+### npm / bun
+
+```bash
+# Global install
+npm install -g @sethgho/glint
+# or
+bun install -g @sethgho/glint
+
+# Or run without installing
+npx @sethgho/glint show happy
+bunx @sethgho/glint show happy
+```
+
+### From source
+
 ```bash
 git clone https://github.com/sethgho/glint.git
 cd glint
@@ -69,17 +106,17 @@ CLI flags override config, which overrides env vars.
 
 ```bash
 # Show an emotion
-bun run src/cli.ts show excited
+glint show excited
 
 # Preview locally (saves a GIF)
-bun run src/cli.ts show happy --preview /tmp/happy.gif
+glint show happy --preview /tmp/happy.gif
 
 # Switch styles
-bun run src/cli.ts show happy --style cyberpunk
+glint show happy --style cyberpunk
 
 # List everything
-bun run src/cli.ts list
-bun run src/cli.ts styles
+glint list
+glint styles
 ```
 
 ### CLI Reference

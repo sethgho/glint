@@ -178,6 +178,7 @@ program
   .argument('<style-name>', 'name for the new style (or a preset: cyberpunk, retro, spooky, nature, robot)')
   .option('--description <desc>', 'style description')
   .option('--aesthetic <aesthetic>', 'aesthetic direction for the AI')
+  .option('--provider <provider>', 'LLM provider: claude, codex, opencode, api (auto-detected if omitted)')
   .action(async (styleName: string, options) => {
     try {
       const { generateSvgStyle, STYLE_PRESETS } = await import('./generate-svg');
@@ -196,7 +197,7 @@ program
       console.log(`Generating SVG style "${styleName}"...`);
       console.log(`Aesthetic: ${prompt.aesthetic}\n`);
 
-      const svgs = await generateSvgStyle(prompt);
+      const svgs = await generateSvgStyle(prompt, options.provider);
 
       // Write SVGs and manifest
       const files: Record<string, string> = {};

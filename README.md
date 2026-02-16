@@ -1,10 +1,6 @@
 <div align="center">
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/readme/logo.svg">
-  <source media="(prefers-color-scheme: light)" srcset="assets/readme/logo-light.svg">
-  <img src="assets/readme/logo.svg" width="300" alt="glint">
-</picture>
+<img src="assets/readme/logo.png" width="300" alt="glint">
 
 # glint
 

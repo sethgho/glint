@@ -1,21 +1,26 @@
 <div align="center">
 
-# ✨ glint
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/readme/logo.svg">
+  <source media="(prefers-color-scheme: light)" srcset="assets/readme/logo-light.svg">
+  <img src="assets/readme/logo.svg" width="300" alt="glint">
+</picture>
 
-### Give your AI agent a face.
+# glint
 
-**glint** renders expressive pixel-art emotions on [Tidbyt](https://tidbyt.com) displays — so you can *see* how your agent is feeling at a glance.
+### Expressive eyes for your Tidbyt display.
+
+Give your AI agent a face. **glint** renders emotion styles on [Tidbyt](https://tidbyt.com) — so you can *see* how your agent is feeling at a glance.
 
 <br>
 
 <img src="assets/readme/ai-v1/excited.png" width="384" alt="glint — excited eyes on a Tidbyt display">
 
 <br>
-<br>
 
 No frameworks. No magic. Just pixels and personality.
 
-[Get Started](#installation) · [Emotions](#emotions) · [Styles](#styles) · [Agent Integration](#for-ai-agents)
+[Get Started](#installation) · [Emotions](#emotions) · [Styles](#styles) · [Community Gallery](https://glint.sethgholson.com) · [Agent Integration](#for-ai-agents)
 
 </div>
 
@@ -159,6 +164,22 @@ Chunky, bold pixel art with a retro game aesthetic.
 |:---:|:---:|:---:|:---:|:---:|
 | <img src="assets/readme/pixel-art/neutral.png" width="128"><br>neutral | <img src="assets/readme/pixel-art/happy.png" width="128"><br>happy | <img src="assets/readme/pixel-art/sad.png" width="128"><br>sad | <img src="assets/readme/pixel-art/angry.png" width="128"><br>angry | <img src="assets/readme/pixel-art/surprised.png" width="128"><br>surprised |
 | <img src="assets/readme/pixel-art/worried.png" width="128"><br>worried | <img src="assets/readme/pixel-art/sleepy.png" width="128"><br>sleepy | <img src="assets/readme/pixel-art/excited.png" width="128"><br>excited | <img src="assets/readme/pixel-art/confused.png" width="128"><br>confused | <img src="assets/readme/pixel-art/focused.png" width="128"><br>focused |
+
+### 🌐 Community Gallery
+
+Browse and install styles from the community at **[glint.sethgholson.com](https://glint.sethgholson.com)**.
+
+```bash
+# Search community styles
+glint style search
+
+# Install from the gallery
+glint style install @sethgho/ai-v1
+
+# Publish your own
+glint auth login
+glint style publish my-style
+```
 
 ### Custom User Styles
 

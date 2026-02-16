@@ -400,25 +400,29 @@ style
     };
     writeFileSync(join(styleDir, 'glint-style.json'), JSON.stringify(manifest, null, 2));
 
-    // Create placeholder PNGs (1x1 black pixel)
-    const sharp = (await import('sharp')).default;
+    // Create placeholder SVGs (dark rectangle with simple eyes)
     for (const emotion of REQUIRED_EMOTIONS) {
-      await sharp({ create: { width: 64, height: 32, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 255 } } })
-        .png()
-        .toFile(join(styleDir, `${emotion}.png`));
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 32" width="64" height="32">
+  <rect width="64" height="32" fill="#111"/>
+  <circle cx="22" cy="14" r="5" fill="#333"/>
+  <circle cx="42" cy="14" r="5" fill="#333"/>
+  <!-- TODO: design ${emotion} eyes -->
+</svg>`;
+      writeFileSync(join(styleDir, `${emotion}.svg`), svg);
     }
 
     console.log(`\n✨ Style scaffolded at ${styleDir}`);
     console.log(`\nFiles created:`);
     console.log(`  glint-style.json  (manifest)`);
     for (const emotion of REQUIRED_EMOTIONS) {
-      console.log(`  ${emotion}.png     (placeholder)`);
+      console.log(`  ${emotion}.svg     (placeholder)`);
     }
     console.log(`\nNext steps:`);
-    console.log(`  1. Replace the placeholder PNGs with your designs (64×32)`);
+    console.log(`  1. Replace the placeholder SVGs with your designs`);
     console.log(`  2. Edit glint-style.json (description, tags, etc.)`);
     console.log(`  3. Validate: glint validate ${name}`);
     console.log(`  4. Publish:  glint style publish ${name}`);
+    console.log(`\nOr generate with AI: glint generate ${name} --aesthetic "your style"`);
   });
 
 program.parse();

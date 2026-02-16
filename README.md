@@ -4,17 +4,17 @@
 
 # glint
 
-### Expressive eyes for your Tidbyt display.
+### Expressive eyes for your display.
 
-Give your AI agent a face. **glint** renders emotion styles on [Tidbyt](https://tidbyt.com) — so you can *see* how your agent is feeling at a glance.
-
-<br>
-
-<img src="assets/readme/ai-v1/excited.png" width="384" alt="glint — excited eyes on a Tidbyt display">
+Give your AI agent a face. **glint** renders emotion styles on [Tidbyt](https://tidbyt.com), [TRMNL](https://usetrmnl.com), desktop widgets, and any display — so you can *see* how your agent is feeling at a glance.
 
 <br>
 
-No frameworks. No magic. Just pixels and personality.
+<img src="assets/readme/kawaii/excited.svg" width="384" alt="glint — excited kawaii eyes">
+
+<br>
+
+All styles are **SVG** — they scale infinitely to any resolution.
 
 [Get Started](#installation) · [Emotions](#emotions) · [Styles](#styles) · [Community Gallery](https://glint.sethgholson.com) · [Agent Integration](#for-ai-agents)
 
@@ -26,7 +26,7 @@ No frameworks. No magic. Just pixels and personality.
 
 AI agents are invisible by default. They run in terminals, in the cloud, in the background — and you have no idea what they're doing or how they're "feeling."
 
-**glint changes that.** It gives agents a physical presence: a pair of expressive eyes on a tiny LED display. Happy when a task succeeds. Worried when something's uncertain. Focused when deep in work.
+**glint changes that.** It gives agents a physical presence: a pair of expressive eyes on a display. Happy when a task succeeds. Worried when something's uncertain. Focused when deep in work.
 
 It's simple, it's delightful, and it makes your agent feel *real*.
 
@@ -57,7 +57,7 @@ cat > ~/.config/glint/config.json <<EOF
 {
   "token": "your_token",
   "deviceId": "your_device_id",
-  "style": "ai-v1",
+  "style": "kawaii",
   "installationId": "glint"
 }
 EOF
@@ -75,7 +75,7 @@ bun run src/cli.ts show excited
 bun run src/cli.ts show happy --preview /tmp/happy.gif
 
 # Switch styles
-bun run src/cli.ts show happy --style pixel-art
+bun run src/cli.ts show happy --style cyberpunk
 
 # List everything
 bun run src/cli.ts list
@@ -86,7 +86,7 @@ bun run src/cli.ts styles
 
 ```
 glint show <emotion> [options]
-  -s, --style <style>         Visual style (default: from config or ai-v1)
+  -s, --style <style>         Visual style (default: from config or kawaii)
   -t, --token <token>         Tidbyt API token
   -d, --device-id <id>        Tidbyt device ID
   -i, --installation-id <id>  Installation ID (default: "glint")
@@ -94,8 +94,20 @@ glint show <emotion> [options]
 
 glint list                    List available emotions
 glint styles                  List available visual styles
-glint validate <style>        Validate a style directory
-glint generate <style-name>   Generate emotion images using AI
+glint validate <style>        Validate a style's SVG files
+glint generate <style-name>   Generate SVG emotions using AI (LLM)
+```
+
+### Community Registry
+
+```
+glint auth login              Authenticate via GitHub
+glint auth whoami             Show current user
+glint style search [query]    Search community styles
+glint style info @user/style  Show style details
+glint style install @user/s   Install a community style
+glint style publish <name>    Publish your style
+glint style init <name>       Scaffold a new style package
 ```
 
 ### Configuration
@@ -115,7 +127,7 @@ Priority: **CLI flags → config file → environment variables → built-in def
 
 ## Emotions
 
-Ten distinct states, each designed to be instantly readable on a 64×32 LED matrix:
+Ten distinct states, each designed to be instantly readable at any size:
 
 | Emotion | When to use it |
 |---------|---------------|
@@ -134,34 +146,52 @@ Ten distinct states, each designed to be instantly readable on a 64×32 LED matr
 
 ## Styles
 
-All glint styles are **SVG-based** — they scale infinitely from Tidbyt (64×32) to TRMNL (800×480) and beyond. The same file works everywhere.
+All glint styles are **SVG-based** — they scale infinitely from Tidbyt (64×32) to TRMNL (800×480) to desktop widgets and beyond. The same file works everywhere.
 
-### `kawaii` — Kawaii Eyes ✨ *(default)*
+### `kawaii` — Kawaii Eyes ✨
 
-Big sparkly anime-inspired eyes with vibrant colors and kawaii charm. Includes blush, sparkles, and expressive details.
-
-| | | | | |
-|:---:|:---:|:---:|:---:|:---:|
-| <img src="assets/readme/ai-v1/neutral.png" width="128"><br>neutral | <img src="assets/readme/ai-v1/happy.png" width="128"><br>happy | <img src="assets/readme/ai-v1/sad.png" width="128"><br>sad | <img src="assets/readme/ai-v1/angry.png" width="128"><br>angry | <img src="assets/readme/ai-v1/surprised.png" width="128"><br>surprised |
-| <img src="assets/readme/ai-v1/worried.png" width="128"><br>worried | <img src="assets/readme/ai-v1/sleepy.png" width="128"><br>sleepy | <img src="assets/readme/ai-v1/excited.png" width="128"><br>excited | <img src="assets/readme/ai-v1/confused.png" width="128"><br>confused | <img src="assets/readme/ai-v1/focused.png" width="128"><br>focused |
-
-### `anime` — Anime-Style Eyes
-
-Vibrant, sparkle-filled eyes inspired by anime aesthetics.
+Big sparkly anime-inspired eyes with vibrant blue irises, blush marks, sparkles, and tears. The default style.
 
 | | | | | |
 |:---:|:---:|:---:|:---:|:---:|
-| <img src="assets/readme/anime/neutral.png" width="128"><br>neutral | <img src="assets/readme/anime/happy.png" width="128"><br>happy | <img src="assets/readme/anime/sad.png" width="128"><br>sad | <img src="assets/readme/anime/angry.png" width="128"><br>angry | <img src="assets/readme/anime/surprised.png" width="128"><br>surprised |
-| <img src="assets/readme/anime/worried.png" width="128"><br>worried | <img src="assets/readme/anime/sleepy.png" width="128"><br>sleepy | <img src="assets/readme/anime/excited.png" width="128"><br>excited | <img src="assets/readme/anime/confused.png" width="128"><br>confused | <img src="assets/readme/anime/focused.png" width="128"><br>focused |
+| <img src="assets/readme/kawaii/neutral.svg" width="128"><br>neutral | <img src="assets/readme/kawaii/happy.svg" width="128"><br>happy | <img src="assets/readme/kawaii/sad.svg" width="128"><br>sad | <img src="assets/readme/kawaii/angry.svg" width="128"><br>angry | <img src="assets/readme/kawaii/surprised.svg" width="128"><br>surprised |
+| <img src="assets/readme/kawaii/worried.svg" width="128"><br>worried | <img src="assets/readme/kawaii/sleepy.svg" width="128"><br>sleepy | <img src="assets/readme/kawaii/excited.svg" width="128"><br>excited | <img src="assets/readme/kawaii/confused.svg" width="128"><br>confused | <img src="assets/readme/kawaii/focused.svg" width="128"><br>focused |
 
-### `pixel-art` — Retro Pixel Art
+### `cyberpunk` — Neon Glow
 
-Chunky, bold pixel art with a retro game aesthetic.
+Glowing neon eyes with cyan and magenta, gaussian blur glow effects, and a dark tech aesthetic.
 
 | | | | | |
 |:---:|:---:|:---:|:---:|:---:|
-| <img src="assets/readme/pixel-art/neutral.png" width="128"><br>neutral | <img src="assets/readme/pixel-art/happy.png" width="128"><br>happy | <img src="assets/readme/pixel-art/sad.png" width="128"><br>sad | <img src="assets/readme/pixel-art/angry.png" width="128"><br>angry | <img src="assets/readme/pixel-art/surprised.png" width="128"><br>surprised |
-| <img src="assets/readme/pixel-art/worried.png" width="128"><br>worried | <img src="assets/readme/pixel-art/sleepy.png" width="128"><br>sleepy | <img src="assets/readme/pixel-art/excited.png" width="128"><br>excited | <img src="assets/readme/pixel-art/confused.png" width="128"><br>confused | <img src="assets/readme/pixel-art/focused.png" width="128"><br>focused |
+| <img src="assets/readme/cyberpunk/neutral.svg" width="128"><br>neutral | <img src="assets/readme/cyberpunk/happy.svg" width="128"><br>happy | <img src="assets/readme/cyberpunk/sad.svg" width="128"><br>sad | <img src="assets/readme/cyberpunk/angry.svg" width="128"><br>angry | <img src="assets/readme/cyberpunk/surprised.svg" width="128"><br>surprised |
+| <img src="assets/readme/cyberpunk/worried.svg" width="128"><br>worried | <img src="assets/readme/cyberpunk/sleepy.svg" width="128"><br>sleepy | <img src="assets/readme/cyberpunk/excited.svg" width="128"><br>excited | <img src="assets/readme/cyberpunk/confused.svg" width="128"><br>confused | <img src="assets/readme/cyberpunk/focused.svg" width="128"><br>focused |
+
+### `retro` — Green Phosphor Terminal
+
+Blocky 8-bit pixel art in green phosphor monochrome. CRT terminal vibes.
+
+| | | | | |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="assets/readme/retro/neutral.svg" width="128"><br>neutral | <img src="assets/readme/retro/happy.svg" width="128"><br>happy | <img src="assets/readme/retro/sad.svg" width="128"><br>sad | <img src="assets/readme/retro/angry.svg" width="128"><br>angry | <img src="assets/readme/retro/surprised.svg" width="128"><br>surprised |
+| <img src="assets/readme/retro/worried.svg" width="128"><br>worried | <img src="assets/readme/retro/sleepy.svg" width="128"><br>sleepy | <img src="assets/readme/retro/excited.svg" width="128"><br>excited | <img src="assets/readme/retro/confused.svg" width="128"><br>confused | <img src="assets/readme/retro/focused.svg" width="128"><br>focused |
+
+### `spooky` — Halloween Eyes
+
+Jack-o-lantern triangle eyes with eerie orange and green glow. Perfect for October.
+
+| | | | | |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="assets/readme/spooky/neutral.svg" width="128"><br>neutral | <img src="assets/readme/spooky/happy.svg" width="128"><br>happy | <img src="assets/readme/spooky/sad.svg" width="128"><br>sad | <img src="assets/readme/spooky/angry.svg" width="128"><br>angry | <img src="assets/readme/spooky/surprised.svg" width="128"><br>surprised |
+| <img src="assets/readme/spooky/worried.svg" width="128"><br>worried | <img src="assets/readme/spooky/sleepy.svg" width="128"><br>sleepy | <img src="assets/readme/spooky/excited.svg" width="128"><br>excited | <img src="assets/readme/spooky/confused.svg" width="128"><br>confused | <img src="assets/readme/spooky/focused.svg" width="128"><br>focused |
+
+### `minimal` — Clean & Simple
+
+White-on-dark geometric eyes. No frills, maximum readability.
+
+| | | | | |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="assets/readme/minimal/neutral.svg" width="128"><br>neutral | <img src="assets/readme/minimal/happy.svg" width="128"><br>happy | <img src="assets/readme/minimal/sad.svg" width="128"><br>sad | <img src="assets/readme/minimal/angry.svg" width="128"><br>angry | <img src="assets/readme/minimal/surprised.svg" width="128"><br>surprised |
+| <img src="assets/readme/minimal/worried.svg" width="128"><br>worried | <img src="assets/readme/minimal/sleepy.svg" width="128"><br>sleepy | <img src="assets/readme/minimal/excited.svg" width="128"><br>excited | <img src="assets/readme/minimal/confused.svg" width="128"><br>confused | <img src="assets/readme/minimal/focused.svg" width="128"><br>focused |
 
 ### 🌐 Community Gallery
 
@@ -172,55 +202,61 @@ Browse and install styles from the community at **[glint.sethgholson.com](https:
 glint style search
 
 # Install from the gallery
-glint style install @sethgho/ai-v1
+glint style install @sethgho/cyberpunk
 
 # Publish your own
 glint auth login
 glint style publish my-style
 ```
 
-### Custom User Styles
+### Creating Your Own Style
 
-Create your own styles by placing emotion SVGs in `~/.config/glint/styles/<style-name>/`. Each directory needs 10 SVG files (one per emotion): `neutral.svg`, `happy.svg`, `sad.svg`, `angry.svg`, `surprised.svg`, `worried.svg`, `sleepy.svg`, `excited.svg`, `confused.svg`, `focused.svg`.
+Create SVG-based emotion packs in `~/.config/glint/styles/<style-name>/`. Each style needs:
+
+- **10 SVG files** — one per emotion: `neutral.svg`, `happy.svg`, `sad.svg`, `angry.svg`, `surprised.svg`, `worried.svg`, `sleepy.svg`, `excited.svg`, `confused.svg`, `focused.svg`
+- **`glint-style.json`** manifest with name, version, and description
 
 **SVG Requirements:**
 - Must include `viewBox` attribute (e.g., `viewBox="0 0 64 32"`)
-- Max file size: 100KB (typical SVGs are 1-2KB)
-- 2:1 aspect ratio recommended (e.g., 64×32, 128×64)
-
-User styles appear automatically in `glint styles` with a "(user)" indicator.
+- Max file size: 100KB per emotion (typical SVGs are 1-2KB)
+- 2:1 aspect ratio recommended
 
 ```bash
-# Validate your style
-glint validate my-custom-style
+# Scaffold a new style
+glint style init my-style
 
-# Generate a style using AI
-glint generate my-new-style
+# Generate using AI (requires ANTHROPIC_API_KEY)
+glint generate my-style --aesthetic "watercolor soft pastels"
 
-# Use it
-glint show happy --style my-custom-style
+# Or use a preset
+glint generate cyberpunk   # neon glow
+glint generate retro       # green phosphor
+glint generate spooky      # halloween
+glint generate nature      # earthy tones
+glint generate robot       # mechanical LED
+
+# Validate
+glint validate my-style
+
+# Publish to the community
+glint auth login
+glint style publish my-style
 ```
 
-The `generate` command uses Replicate (set `REPLICATE_API_TOKEN`) to create all 10 emotions. Configure the provider, model, and prompt template in `~/.config/glint/config.json`:
+#### Style Manifest (`glint-style.json`)
 
 ```json
 {
-  "generate": {
-    "provider": "replicate",
-    "model": "black-forest-labs/flux-schnell",
-    "promptTemplate": "Cartoon expressive {emotion} eyes on pure black background, 64x32 pixel art for LED display, simple and readable"
-  }
+  "specVersion": "1.0",
+  "name": "my-style",
+  "version": "1.0.0",
+  "description": "A brief description of your style",
+  "emotions": ["happy", "sad", "angry", "surprised", "worried", "sleepy", "excited", "confused", "focused", "neutral"],
+  "files": {},
+  "tags": ["cute", "colorful"],
+  "license": "MIT"
 }
 ```
-
-### `default` — Programmatic
-
-Simple geometric eyes and eyebrows drawn entirely in code. No external assets needed.
-
-| | | | | |
-|:---:|:---:|:---:|:---:|:---:|
-| <img src="assets/readme/default/neutral.png" width="128"><br>neutral | <img src="assets/readme/default/happy.png" width="128"><br>happy | <img src="assets/readme/default/sad.png" width="128"><br>sad | <img src="assets/readme/default/angry.png" width="128"><br>angry | <img src="assets/readme/default/surprised.png" width="128"><br>surprised |
-| <img src="assets/readme/default/worried.png" width="128"><br>worried | <img src="assets/readme/default/sleepy.png" width="128"><br>sleepy | <img src="assets/readme/default/excited.png" width="128"><br>excited | <img src="assets/readme/default/confused.png" width="128"><br>confused | <img src="assets/readme/default/focused.png" width="128"><br>focused |
 
 ---
 
@@ -254,19 +290,22 @@ See **[SKILL.md](SKILL.md)** for complete integration instructions including ski
 ## Architecture
 
 ```
-emotions.ts  →  draw.ts  →  canvas.ts  →  GIF encoder  →  Tidbyt API
-   (config)    (render)    (pixel buf)     (encode)         (push)
+CLI:    cli.ts → show/validate/generate/publish
 
-styles.ts    →  assets/  →  sharp     →  GIF encoder  →  Tidbyt API
-  (registry)   (images)   (composite)    (encode)         (push)
+Show:   styles.ts → load SVG → resvg (rasterize) → GIF encoder → Tidbyt API
+                                  ↓
+                          sharp (resize 64×32)
+
+Generate: generate-svg.ts → Anthropic API → SVG files → validate → save
+
+Registry: registry.ts → glint.sethgholson.com API → publish/install/search
 ```
 
-- **canvas.ts** — 64×32 RGBA buffer with pixel drawing primitives
-- **draw.ts** — Converts emotion config to pixel art (programmatic style)
-- **emotions.ts** — Defines the 10 emotions with eye/brow parameters
-- **styles.ts** — Manages visual styles (programmatic vs image-based)
+- **styles.ts** — Manages visual styles (SVG-based, user + built-in)
+- **generate-svg.ts** — LLM-powered SVG emotion generation
+- **registry.ts** — Community gallery client (auth, publish, install, search)
+- **validate.ts** — SVG validation (viewBox, file size, required emotions)
 - **config.ts** — Reads `~/.config/glint/config.json` for defaults
-- **pixelfont.ts** — Crisp 3×5 pixel font for LED displays
 - **push.ts** — GIF encoding and Tidbyt API integration
 
 ## License

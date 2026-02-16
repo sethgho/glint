@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 32" width="64" height="32"><rect width="64" height="32" fill="#0a0a1a"/><defs><filter id="g"><feGaussianBlur stdDeviation="1"/></filter></defs>
+      <path d="M13 15 Q20 11 27 15" stroke="#0ff" stroke-width="1.2" fill="none" filter="url(#g)"/>
+      <path d="M13 15 Q20 11 27 15" stroke="#0ff" stroke-width="0.6" fill="none"/>
+      <path d="M37 15 Q44 11 51 15" stroke="#f0f" stroke-width="1.2" fill="none" filter="url(#g)"/>
+      <path d="M37 15 Q44 11 51 15" stroke="#f0f" stroke-width="0.6" fill="none"/>
+      <text x="52" y="8" font-size="5" fill="#0ff" font-family="monospace" opacity="0.6">Z</text>
+      <text x="56" y="5" font-size="3.5" fill="#f0f" font-family="monospace" opacity="0.4">Z</text></svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 32" width="64" height="32">
+  <rect width="64" height="32" fill="#111"/>
+  <path d="M13 15 Q20 10 27 15" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <path d="M37 15 Q44 10 51 15" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <text x="52" y="8" font-size="6" fill="#888" font-family="sans-serif" font-weight="bold">z</text>
+      <text x="56" y="5" font-size="4" fill="#666" font-family="sans-serif" font-weight="bold">z</text>
+</svg>

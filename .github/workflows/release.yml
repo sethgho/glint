@@ -22,7 +22,7 @@ jobs:
           - os: macos-latest
             target: bun-darwin-arm64
             artifact: glint-darwin-arm64
-          - os: macos-13
+          - os: macos-latest
             target: bun-darwin-x64
             artifact: glint-darwin-x64
 
@@ -42,7 +42,7 @@ jobs:
           bun build src/cli.ts --compile --target ${{ matrix.target }} --outfile ${{ matrix.artifact }}
 
       - name: Smoke test
-        if: ${{ !contains(matrix.target, 'arm64') || matrix.os == 'macos-latest' }}
+        if: ${{ matrix.target == 'bun-linux-x64' || matrix.target == 'bun-darwin-arm64' }}
         run: |
           ./${{ matrix.artifact }} --version
           ./${{ matrix.artifact }} list

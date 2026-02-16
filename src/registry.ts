@@ -229,8 +229,7 @@ export async function install(ref: string): Promise<string> {
       throw new Error(`Hash mismatch for ${emotion.emotion}: expected ${emotion.hash}, got ${hash}`);
     }
 
-    const ext = emotion.url?.includes('format=svg') || emotion.url?.endsWith('.svg') ? 'svg' : 'svg';
-    writeFileSync(join(installDir, `${emotion.emotion}.${ext}`), buf);
+    writeFileSync(join(installDir, `${emotion.emotion}.svg`), buf);
   }
 
   // Write manifest

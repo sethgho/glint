@@ -8,7 +8,10 @@
     "glint": "./dist/cli.js"
   },
   "scripts": {
+    "postinstall": "bash scripts/patch-deps.sh",
     "build": "bun build src/cli.ts --outdir dist --target node",
+    "build:binary": "bun build src/cli.ts --compile --outfile glint",
+    "build:binary:all": "bash scripts/build-all.sh",
     "dev": "bun run src/cli.ts",
     "test": "bun test"
   },
@@ -23,6 +26,6 @@
     "@xmldom/xmldom": "^0.8.11",
     "commander": "^14.0.3",
     "gif-encoder-2": "^1.0.5",
-    "sharp": "^0.34.5"
+    "pngjs": "^7.0.0"
   }
 }

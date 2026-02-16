@@ -4,10 +4,10 @@
  * Canvas: 64x32
  */
 
-import sharp from 'sharp';
+import { PNG } from 'pngjs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { mkdirSync } from 'fs';
+import { mkdirSync, writeFileSync } from 'fs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(__dirname, '../assets/pixel-art');
@@ -52,11 +52,19 @@ class PixelCanvas {
   }
 
   async save(name: string) {
-    const buffer = await sharp(Buffer.from(this.buf), { raw: { width: W, height: H, channels: 3 } })
-      .png()
-      .toBuffer();
+    const png = new PNG({ width: W, height: H });
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const srcIdx = (y * W + x) * 3;
+        const dstIdx = (y * W + x) * 4;
+        png.data[dstIdx] = this.buf[srcIdx];
+        png.data[dstIdx + 1] = this.buf[srcIdx + 1];
+        png.data[dstIdx + 2] = this.buf[srcIdx + 2];
+        png.data[dstIdx + 3] = 255;
+      }
+    }
     const path = join(OUT_DIR, `${name}.png`);
-    await sharp(buffer).toFile(path);
+    writeFileSync(path, PNG.sync.write(png));
     console.log(`  ✓ ${name}.png`);
   }
 }

@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/readme/logo.png" width="300" alt="glint">
+<img src="assets/readme/logo.svg" width="300" alt="glint">
 
 # glint
 

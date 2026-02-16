@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 32" width="64" height="32">
+  <rect width="64" height="32" fill="#1a1a2e" rx="2"/>
+  <!-- Left eye - closed happy arc -->
+  <path d="M13 15 Q20 10 27 15" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <!-- Subtle lash lines -->
+  <line x1="15" y1="14" x2="14" y2="12" stroke="#fff" stroke-width="0.8" stroke-linecap="round"/>
+  <line x1="20" y1="12.5" x2="20" y2="10.5" stroke="#fff" stroke-width="0.8" stroke-linecap="round"/>
+  <line x1="25" y1="14" x2="26" y2="12" stroke="#fff" stroke-width="0.8" stroke-linecap="round"/>
+  <!-- Right eye - closed happy arc -->
+  <path d="M37 15 Q44 10 51 15" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <line x1="39" y1="14" x2="38" y2="12" stroke="#fff" stroke-width="0.8" stroke-linecap="round"/>
+  <line x1="44" y1="12.5" x2="44" y2="10.5" stroke="#fff" stroke-width="0.8" stroke-linecap="round"/>
+  <line x1="49" y1="14" x2="50" y2="12" stroke="#fff" stroke-width="0.8" stroke-linecap="round"/>
+  <!-- Blush -->
+  <ellipse cx="12" cy="19" rx="4" ry="2" fill="#ff6b9d" opacity="0.3"/>
+  <ellipse cx="52" cy="19" rx="4" ry="2" fill="#ff6b9d" opacity="0.3"/>
+  <!-- Sleep bubble -->
+  <circle cx="56" cy="6" r="3" fill="none" stroke="#6bc4ff" stroke-width="0.8" opacity="0.5"/>
+  <circle cx="53" cy="10" r="1.5" fill="none" stroke="#6bc4ff" stroke-width="0.6" opacity="0.4"/>
+  <circle cx="51" cy="13" r="0.8" fill="#6bc4ff" opacity="0.3"/>
+  <!-- Tiny mouth -->
+  <path d="M30 22 Q32 24 34 22" stroke="#fff" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+</svg>

@@ -34,17 +34,26 @@ export const BUILTIN_STYLES: Record<string, Style> = {
   'ai-v1': {
     name: 'ai-v1',
     type: 'image',
+    format: 'png',
     description: 'AI-generated cartoon eyes (flux-schnell)',
   },
   'anime': {
     name: 'anime',
     type: 'image',
+    format: 'png',
     description: 'Anime-style eyes with sparkles and vibrant colors',
   },
   'pixel-art': {
     name: 'pixel-art',
     type: 'image',
+    format: 'png',
     description: 'Retro pixel-art game-style eyes with chunky pixels and bold outlines',
+  },
+  'kawaii': {
+    name: 'kawaii',
+    type: 'image',
+    format: 'svg',
+    description: 'Big sparkly kawaii eyes — SVG format, scales infinitely',
   },
 };
 

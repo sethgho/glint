@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 32" width="64" height="32">
+  <rect width="64" height="32" fill="#1a1a2e" rx="2"/>
+  <!-- Left eye - HUGE and sparkling -->
+  <ellipse cx="20" cy="14" rx="9" ry="10" fill="#fff"/>
+  <ellipse cx="20" cy="15" rx="7" ry="8" fill="#ffcc00"/>
+  <ellipse cx="20" cy="16" rx="6" ry="6" fill="#ff9900"/>
+  <circle cx="20" cy="14" r="4" fill="#111"/>
+  <!-- Multiple sparkles -->
+  <circle cx="16" cy="9" r="2.5" fill="#fff"/>
+  <circle cx="24" cy="11" r="1.5" fill="#fff" opacity="0.9"/>
+  <circle cx="17" cy="19" r="1" fill="#fff" opacity="0.7"/>
+  <!-- Right eye - HUGE and sparkling -->
+  <ellipse cx="44" cy="14" rx="9" ry="10" fill="#fff"/>
+  <ellipse cx="44" cy="15" rx="7" ry="8" fill="#ffcc00"/>
+  <ellipse cx="44" cy="16" rx="6" ry="6" fill="#ff9900"/>
+  <circle cx="44" cy="14" r="4" fill="#111"/>
+  <circle cx="40" cy="9" r="2.5" fill="#fff"/>
+  <circle cx="48" cy="11" r="1.5" fill="#fff" opacity="0.9"/>
+  <circle cx="47" cy="19" r="1" fill="#fff" opacity="0.7"/>
+  <!-- Blush - bright pink -->
+  <ellipse cx="10" cy="19" rx="5" ry="2.5" fill="#ff6b9d" opacity="0.5"/>
+  <ellipse cx="54" cy="19" rx="5" ry="2.5" fill="#ff6b9d" opacity="0.5"/>
+  <!-- Big happy mouth -->
+  <path d="M24 24 Q32 28 40 24" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <!-- Extra sparkles around the scene -->
+  <circle cx="8" cy="8" r="1" fill="#ffcc00" opacity="0.6"/>
+  <circle cx="56" cy="8" r="1" fill="#ffcc00" opacity="0.6"/>
+</svg>

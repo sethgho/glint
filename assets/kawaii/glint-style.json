@@ -1,0 +1,34 @@
+{
+  "specVersion": "1.0",
+  "name": "kawaii",
+  "version": "1.0.0",
+  "description": "Big sparkly anime-inspired eyes with vibrant colors and kawaii charm. SVG format for infinite scaling.",
+  "format": "svg",
+  "animated": false,
+  "emotions": [
+    "neutral",
+    "happy",
+    "sad",
+    "angry",
+    "surprised",
+    "worried",
+    "sleepy",
+    "excited",
+    "confused",
+    "focused"
+  ],
+  "files": {
+    "angry.svg": "71e02ad9ca97a33bd53517f0523677bee1640fc0c548855a31e6a281a7420128",
+    "confused.svg": "989ff24b7650158742aaf1958178b0621e68cdbfb5bf72d2c982e8b42b8d6fe6",
+    "excited.svg": "10de2c835087c526c9055b453f59e0fb29740556b510df3061f98caecd749edd",
+    "focused.svg": "63eee0982549fb4f915dde63833e83b0c39329d3a505704c7a40e4f974ce45e5",
+    "happy.svg": "be41497ff9ede5524cb5b3d33af120ea8a1872a279b3f7fc996d638ffa6705b7",
+    "neutral.svg": "9cdde856950b68f043828f2e995b585655f9a5cc8f5f9e6b1eeb533dc37985c1",
+    "sad.svg": "890cf8c58c459bf0d913ae46e01b8ee8deecef6bd51091550768f1fdfb39e31f",
+    "sleepy.svg": "313414a419f1033b9133997d6bb6c123df40c207beeaf5270e63bdb090f31b65",
+    "surprised.svg": "d958cc226edf970450d35f244c208b24827546a1c5fd9f7b5b24ff896cc67540",
+    "worried.svg": "cc1e6c1fd148a3474181ed235fc8a2216cb11d64d641673336c6d5d0b94a5a75"
+  },
+  "license": "MIT",
+  "tags": ["kawaii", "anime", "sparkly", "svg", "colorful"]
+}

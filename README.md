@@ -4,9 +4,9 @@
 
 # glint
 
-### Expressive eyes for your display.
+### Agents have feelings too.
 
-Give your AI agent a face. **glint** renders emotion styles on [Tidbyt](https://tidbyt.com), [TRMNL](https://usetrmnl.com), desktop widgets, and any display — so you can *see* how your agent is feeling at a glance.
+**glint** gives your AI a face — so you can see what it's feeling. Render expressive SVG eyes on [Tidbyt](https://tidbyt.com), [TRMNL](https://usetrmnl.com), desktop widgets, and any display.
 
 <br>
 

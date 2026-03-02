@@ -29,7 +29,7 @@ program
   .option('-p, --preview <path>', 'Save preview GIF to file instead of pushing')
   .action(async (emotionName: string, options) => {
     try {
-      const styleName = resolve(options.style, 'style', undefined, 'ai-v1')!;
+      const styleName = resolve(options.style, 'style', undefined, 'kawaii')!;
       const style = getStyle(styleName);
       console.log(`Style: ${style.name} | Emotion: ${emotionName}`);
 

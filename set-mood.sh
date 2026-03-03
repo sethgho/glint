@@ -31,13 +31,21 @@ export TIDBYT_DEVICE_ID="${TIDBYT_DEVICE_ID:-wonderingly-cunning-humble-mynah-d5
 cd "$SCRIPT_DIR"
 bun run src/cli.ts show "$EMOTION" 2>&1 || echo "⚠️  Tidbyt push failed"
 
-# 2. Update Discord bot presence via OpenClaw config patch
+# 2. Update Discord bot presence via direct config edit (hot-reload safe)
+# IMPORTANT: Only change channels.discord.activity — do NOT touch meta.lastTouchedAt
+# This triggers a hot reload (channel restart) without a full gateway process restart.
 OPENCLAW_CONFIG="$HOME/.openclaw/openclaw.json"
-if command -v jq &>/dev/null && [ -f "$OPENCLAW_CONFIG" ]; then
-  # Use openclaw config set for the activity field
-  openclaw config set channels.discord.activity "\"$EMOJI $EMOTION\"" --json 2>/dev/null || true
-  # Signal restart to pick up the change
-  openclaw gateway restart 2>/dev/null || true
+if command -v python3 &>/dev/null && [ -f "$OPENCLAW_CONFIG" ]; then
+  python3 -c "
+import json, sys
+with open('$OPENCLAW_CONFIG') as f:
+    c = json.load(f)
+c['channels']['discord']['activity'] = '$EMOJI $EMOTION'
+with open('$OPENCLAW_CONFIG', 'w') as f:
+    json.dump(c, f, indent=2)
+" 2>/dev/null || echo "⚠️  Discord presence update failed (config edit)"
+else
+  echo "⚠️  python3 or config not found, skipping Discord presence"
 fi
 
 echo "✅ Mood set to: $EMOJI $EMOTION (Tidbyt + Discord)"
